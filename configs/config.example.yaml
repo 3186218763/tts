@@ -1,0 +1,16 @@
+llm:
+  api_key: "sk-your-deepseek-api-key"
+  base_url: "https://api.deepseek.com"
+  model: "deepseek-chat"
+
+tts:
+  base_url: "http://127.0.0.1:9880"
+  ref_audio_path: "data/ref/huayin_ref.wav"
+  ref_text: "在这里填写参考音频对应的文字内容"
+  ref_language: "zh"
+
+conversation:
+  max_turns: 10
+
+streaming:
+  max_sentence_chars: 25

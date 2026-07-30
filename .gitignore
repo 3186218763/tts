@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 配置（含 API key）
+configs/config.yaml
+
+# 模型与数据
+model/*.ckpt
+model/*.pth
+data/dataset/
+data/ref/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
