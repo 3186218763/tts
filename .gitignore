@@ -10,8 +10,7 @@ configs/config.yaml
 # 模型与数据
 model/*.ckpt
 model/*.pth
-data/dataset/
-data/ref/
+data/
 
 # IDE
 .vscode/
