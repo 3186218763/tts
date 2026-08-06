@@ -57,3 +57,28 @@ async def test_synthesize_default_language_is_auto():
     await client.synthesize("test")
     body = json.loads(route.calls[0].request.content)
     assert body["text_lang"] == "auto"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_check_available_accepts_running_api():
+    route = respx.get("http://127.0.0.1:9880/docs").mock(
+        return_value=httpx.Response(200, text="ok")
+    )
+    client = TTSClient("http://127.0.0.1:9880", "/r.wav", "ref", "zh")
+
+    await client.check_available()
+
+    assert route.called
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_check_available_raises_clear_error_when_api_is_down():
+    respx.get("http://127.0.0.1:9880/docs").mock(
+        return_value=httpx.Response(503)
+    )
+    client = TTSClient("http://127.0.0.1:9880", "/r.wav", "ref", "zh")
+
+    with pytest.raises(RuntimeError, match="TTS 服务未运行"):
+        await client.check_available()

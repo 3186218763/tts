@@ -1,7 +1,7 @@
 # AI 真白花音 TTS 系统设计规格
 
 > 日期：2026-07-30
-> 状态：待审查
+> 状态：P0/P1/P2/P3/P4 已实现并验收
 
 ## 1. 概述
 
@@ -304,12 +304,15 @@ P0 不需要训练、不需要数据管线、不需要流式，是端到端验�
 
 ```
 浏览器 (HTML/JS)
-    ↕ WebSocket (流式传输文字 + 音频)
+    ↕ SSE（流式传输文字 + 音频）
 FastAPI 后端
     └─ 复用 dialogue/ 对话核心（不改逻辑，只加一层 API 封装）
 ```
 
-前端逐步迭代：纯文字聊天气泡 → 加花音头像/表情 → 加音频可视化波形。
+当前实现为 frontend/web.py + frontend/web.html：文字和 WAV 音频通过
+POST /api/chat 的 SSE 事件流传输；相比 WebSocket，SSE 足够覆盖单向 LLM/TTS
+流式回复，并保留 HTTP 部署、代理和断线重连的简单性。后续可在此基础上增加
+音频可视化。
 
 ### 6.4 P4：语音输入
 
@@ -318,7 +321,12 @@ FastAPI 后端
 | 本地 Whisper | 在 4070 上跑 faster-whisper，零成本，中日语都支持 |
 | 云端 ASR | 如阿里语音识别 API，更准但收费 |
 
-加一个 ASR 环节即可，对话核心不用改——输入从"键盘文字"变成"语音识别出的文字"，后续链路完全复用。
+frontend/web.html 通过 MediaRecorder 采集 WebM/Opus，POST /api/transcribe 使用
+faster-whisper 转写后自动复用同一条文字对话链路。上传限制默认为 15 MiB，模型未安装
+时接口返回 503，页面禁用录音按钮。
+
+验收记录：faster-whisper large-v3 在 GPU 0 上成功转写项目生成 WAV，返回 zh 和
+language_probability=1.0。
 
 ## 7. 测试策略
 

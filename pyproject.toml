@@ -10,6 +10,7 @@ dependencies = [
     "soundfile>=0.12",
     "numpy>=1.24",
     "pyyaml>=6.0",
+    "librosa>=0.10.2",
 ]
 
 [project.optional-dependencies]
@@ -18,6 +19,11 @@ dev = [
     "pytest-asyncio>=0.23",
     "respx>=0.21",
 ]
+web = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "faster-whisper>=1.0",
+]
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -25,6 +31,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["dialogue*", "frontend*"]
+
+[tool.setuptools.package-data]
+frontend = ["web.html"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

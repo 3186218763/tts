@@ -1,7 +1,7 @@
 # 训练数据过滤管线设计
 
 > **日期：** 2026-07-31
-> **状态：** 已批准，待实现
+> **状态：** 已实现并验收（含声纹 accept 阶段）
 > **关联：** `docs/superpowers/specs/2026-07-30-mashiro-huayin-tts-design.md` §3.2
 
 ## 背景
@@ -161,3 +161,10 @@ ASR 阶段读取此文件，只转写 `keep: true` 的切片。dataset 阶段也
 | `scripts/build_dataset.py` | 新增 filter 阶段、白名单读取、增量修复、ASR 质量过滤增强 |
 | `data/training_assets.txt` | 新增：17 个杂谈类白名单 |
 | `tests/test_build_dataset.py` | 新增：filter/增量/质量过滤的单元测试 |
+
+## 验收记录（2026-08-06）
+
+- training_assets.txt 当前 22 个白名单素材（在初版 17 个杂谈素材基础上纳入了已审计的完整候选）；分离、切片、特征过滤、声纹和 ASR 均支持增量缓存。
+- filter_results.json：31,463 条切片，保留 18,075，歌声 10,749，时长异常 2,285，低能量 354。
+- speaker_results.json：18,075 条，accept 16,028，uncertain 2,047；最终数据集只消费 accept。
+- asr_results.json：16,399 条，结果由 build_dataset 按语种、置信度、文本质量和文件存在性汇总。

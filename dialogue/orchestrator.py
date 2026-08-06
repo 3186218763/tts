@@ -41,8 +41,13 @@ class Orchestrator:
                 sentence = await tts_queue.get()
                 if sentence is None:
                     break
-                audio = await self._tts.synthesize(sentence)
-                await self._player.play_wav_bytes(audio)
+                try:
+                    audio = await self._tts.synthesize(sentence)
+                    await self._player.play_wav_bytes(audio)
+                except Exception:
+                    # A TTS outage must not discard the text response or stop
+                    # later sentences from being processed.
+                    continue
 
         worker_task = asyncio.create_task(tts_worker())
 
@@ -57,6 +62,11 @@ class Orchestrator:
             if remaining:
                 await tts_queue.put(remaining)
                 yield remaining
+            if not full_response.strip():
+                raise RuntimeError("LLM returned an empty response")
+        except Exception:
+            conversation.rollback_last_user_message()
+            raise
         finally:
             await tts_queue.put(None)
             await worker_task

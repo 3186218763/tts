@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 花音</title>
+  <style>
+    :root { color-scheme: dark; --bg:#101416; --panel:#171d20; --line:#314046; --text:#f1f5f3; --muted:#9eaeab; --accent:#f2b6a0; --accent-strong:#ff917d; --user:#27464a; --assistant:#2d2938; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    .shell { width:min(920px,100%); min-height:100vh; margin:auto; display:flex; flex-direction:column; }
+    header { padding:24px 24px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; }
+    .brand { display:flex; align-items:center; gap:12px; } .mark { width:38px; height:38px; border:1px solid var(--accent); border-radius:50%; color:var(--accent); display:grid; place-items:center; font-weight:700; }
+    h1 { margin:0; font-size:20px; } .status { color:var(--muted); font-size:13px; }
+    button { border:0; color:inherit; font:inherit; cursor:pointer; } button:disabled { cursor:not-allowed; opacity:.45; } .icon { width:36px; height:36px; border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--muted); } .icon:hover { color:var(--text); border-color:var(--accent); }
+    main { flex:1; padding:24px; display:flex; flex-direction:column; } #messages { flex:1; display:flex; flex-direction:column; gap:14px; } .empty { margin:auto; color:var(--muted); text-align:center; }
+    .row { display:flex; gap:10px; align-items:flex-end; } .row.user { justify-content:flex-end; } .bubble { max-width:min(720px,86%); padding:11px 14px; border:1px solid var(--line); border-radius:8px; white-space:pre-wrap; overflow-wrap:anywhere; } .user .bubble { background:var(--user); border-color:#3d6669; } .assistant .bubble { background:var(--assistant); border-color:#514762; }
+    .audio { display:block; width:min(360px,100%); height:34px; margin-top:8px; } form { margin-top:24px; display:flex; gap:10px; padding:12px; border:1px solid var(--line); border-radius:8px; background:var(--panel); } textarea { flex:1; min-width:0; min-height:42px; max-height:140px; resize:vertical; border:0; outline:0; background:transparent; color:var(--text); font:inherit; } textarea::placeholder { color:var(--muted); } .send,.record { flex:0 0 42px; width:42px; height:42px; border-radius:6px; } .send { background:var(--accent); color:#201616; font-size:22px; } .send:hover { background:var(--accent-strong); } .record { display:grid; place-items:center; border:1px solid var(--line); background:transparent; } .record:hover { border-color:var(--accent); } .record-dot { width:12px; height:12px; border-radius:50%; background:#ec665d; } .record.recording { border-color:#ec665d; } .record.recording .record-dot { width:11px; height:11px; border-radius:2px; }
+    @media (max-width:600px) { header,main { padding-left:16px; padding-right:16px; } .bubble { max-width:92%; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header><div class="brand"><div class="mark" aria-hidden="true">花</div><div><h1>AI 花音</h1><div class="status" id="status">在线</div></div></div><button class="icon" id="reset" title="清空对话" aria-label="清空对话">↻</button></header>
+    <main><div id="messages"><div class="empty" id="empty">你好，今天想聊点什么？</div></div>
+      <form id="chat-form"><button type="button" class="record" id="record" title="开始录音" aria-label="开始录音"><span class="record-dot" aria-hidden="true"></span></button><textarea id="input" maxlength="2000" placeholder="输入消息..." aria-label="消息"></textarea><button class="send" title="发送" aria-label="发送">↑</button></form>
+    </main>
+  </div>
+  <script>
+    const messages=document.querySelector("#messages"), input=document.querySelector("#input"), form=document.querySelector("#chat-form"), status=document.querySelector("#status"), record=document.querySelector("#record");
+    const sessionKey="huayin-session-id", sessionId=localStorage.getItem(sessionKey)||(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2)); localStorage.setItem(sessionKey,sessionId); let active=false, mediaRecorder=null, recordTimer=null, audioPlaying=false; const audioQueue=[];
+    function row(role,text){document.querySelector("#empty")?.remove();const item=document.createElement("div");item.className="row "+role;const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=text||"";item.appendChild(bubble);messages.appendChild(item);messages.scrollTop=messages.scrollHeight;return{item,bubble};}
+    function playNextAudio(){if(audioPlaying||!audioQueue.length)return;audioPlaying=true;const audio=audioQueue.shift();const next=()=>{audioPlaying=false;playNextAudio();};audio.addEventListener("ended",next,{once:true});audio.addEventListener("error",next,{once:true});audio.play().catch(()=>{audioPlaying=false;});}
+    function playAudio(bubble,encoded){const audio=document.createElement("audio");audio.className="audio";audio.controls=true;audio.src="data:audio/wav;base64,"+encoded;bubble.appendChild(audio);audioQueue.push(audio);playNextAudio();}
+    async function send(message){active=true;input.disabled=true;record.disabled=true;status.textContent="生成中...";row("user",message);const assistant=row("assistant","");
+      try{const response=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message,session_id:sessionId})});if(!response.ok)throw new Error((await response.json()).error||"请求失败");const reader=response.body.getReader(),decoder=new TextDecoder();let buffer="";
+        while(true){const part=await reader.read();if(part.done)break;buffer+=decoder.decode(part.value,{stream:true});const chunks=buffer.split("\n\n");buffer=chunks.pop();for(const chunk of chunks){if(!chunk.startsWith("data: "))continue;const event=JSON.parse(chunk.slice(6));if(event.type==="sentence")assistant.bubble.append(event.text);else if(event.type==="audio")playAudio(assistant.bubble,event.audio);else if(event.type==="error")throw new Error(event.message);messages.scrollTop=messages.scrollHeight;}}status.textContent="在线";
+      }catch(error){assistant.bubble.textContent="请求失败："+error.message;status.textContent="连接异常";}finally{active=false;input.disabled=false;record.disabled=false;input.focus();}}
+    function recordingState(enabled){record.classList.toggle("recording",enabled);record.title=enabled?"停止录音":"开始录音";record.setAttribute("aria-label",record.title);status.textContent=enabled?"录音中...":"在线";}
+    async function transcribeRecording(blob){active=true;record.disabled=true;input.disabled=true;status.textContent="识别中...";
+      try{const mediaType=(blob.type||"audio/webm").split(";")[0];const response=await fetch("/api/transcribe",{method:"POST",headers:{"Content-Type":mediaType},body:blob});const result=await response.json();if(!response.ok)throw new Error(result.error||"识别失败");input.value=result.text;active=false;input.disabled=false;record.disabled=false;await send(result.text);
+      }catch(error){status.textContent="识别失败";active=false;input.disabled=false;record.disabled=false;input.focus();}}
+    async function startRecording(){if(active)return;if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){status.textContent="浏览器不支持录音";return;}
+      try{const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}});const preferred=["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus"].find(type=>MediaRecorder.isTypeSupported(type));const chunks=[];mediaRecorder=new MediaRecorder(stream,preferred?{mimeType:preferred}:undefined);mediaRecorder.addEventListener("dataavailable",event=>{if(event.data.size)chunks.push(event.data);});mediaRecorder.addEventListener("stop",()=>{clearTimeout(recordTimer);stream.getTracks().forEach(track=>track.stop());recordingState(false);const blob=new Blob(chunks,{type:mediaRecorder.mimeType||"audio/webm"});if(blob.size)transcribeRecording(blob);});mediaRecorder.start(250);recordingState(true);recordTimer=setTimeout(()=>{if(mediaRecorder?.state==="recording")mediaRecorder.stop();},30000);
+      }catch(error){status.textContent="无法访问麦克风";}}
+    form.addEventListener("submit",event=>{event.preventDefault();const message=input.value.trim();if(!message||active)return;input.value="";send(message);});
+    input.addEventListener("keydown",event=>{if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();form.requestSubmit();}});
+    record.addEventListener("click",()=>{if(mediaRecorder?.state==="recording")mediaRecorder.stop();else startRecording();});
+    document.querySelector("#reset").addEventListener("click",async()=>{if(active)return;await fetch("/api/reset",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({session_id:sessionId})});messages.innerHTML='<div class="empty" id="empty">你好，今天想聊点什么？</div>';status.textContent="在线";input.focus();});
+    fetch("/healthz").then(response=>response.json()).then(health=>{if(!health.llm_configured)status.textContent="请配置 DeepSeek API key";else if(health.tts_available===false)status.textContent="TTS 服务未启动";else if(!health.asr_available)status.textContent="在线（语音不可用）";if(!health.asr_available){record.disabled=true;record.title="语音模型未安装";record.setAttribute("aria-label",record.title);}}).catch(()=>{});
+  </script>
+</body>
+</html>

@@ -23,6 +23,32 @@ def test_max_turns_truncation():
     assert messages[3]["content"] == "reply2"
 
 
+def test_pending_user_turn_keeps_complete_history_until_reply():
+    conv = Conversation(max_turns=1)
+    conv.add_user_message("msg0")
+    conv.add_assistant_message("reply0")
+    conv.add_user_message("msg1")
+
+    assert [message["content"] for message in conv.get_messages()] == [
+        "msg0",
+        "reply0",
+        "msg1",
+    ]
+
+    conv.rollback_last_user_message()
+    assert [message["content"] for message in conv.get_messages()] == [
+        "msg0",
+        "reply0",
+    ]
+
+    conv.add_user_message("msg1")
+    conv.add_assistant_message("reply1")
+    assert [message["content"] for message in conv.get_messages()] == [
+        "msg1",
+        "reply1",
+    ]
+
+
 def test_clear():
     conv = Conversation()
     conv.add_user_message("你好")
@@ -32,3 +58,12 @@ def test_clear():
 
 def test_empty_initial():
     assert Conversation().get_messages() == []
+
+
+def test_max_turns_must_be_positive():
+    try:
+        Conversation(max_turns=0)
+    except ValueError as exc:
+        assert "positive" in str(exc)
+    else:
+        raise AssertionError("expected ValueError")

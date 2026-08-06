@@ -28,6 +28,11 @@ async def main() -> None:
         ref_text=config.tts.ref_text,
         ref_language=config.tts.ref_language,
     )
+    try:
+        await tts.check_available()
+    except RuntimeError as exc:
+        print(f"❌ {exc}", file=sys.stderr)
+        return
     player = AudioPlayer()
     orchestrator = Orchestrator(llm, tts, player, max_chars=config.max_sentence_chars)
     conversation = Conversation(max_turns=config.max_turns)

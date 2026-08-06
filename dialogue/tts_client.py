@@ -18,6 +18,17 @@ class TTSClient:
         self._ref_text = ref_text
         self._ref_language = ref_language
 
+    async def check_available(self) -> None:
+        """Raise a user-facing error unless the local API responds."""
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(f"{self._base_url}/docs", timeout=5.0)
+                response.raise_for_status()
+        except Exception as exc:
+            raise RuntimeError(
+                "TTS 服务未运行，请先启动 GPT-SoVITS API"
+            ) from exc
+
     async def synthesize(self, text: str, text_language: str = "auto") -> bytes:
         """将文本合成为 WAV 格式音频字节。"""
         async with httpx.AsyncClient() as client:

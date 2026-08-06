@@ -20,3 +20,10 @@ async def test_play_wav_bytes_calls_sounddevice():
         mock_sf.read.assert_called_once()
         mock_sd.play.assert_called_once_with(fake_audio, 32000)
         mock_sd.wait.assert_called_once()
+
+
+def test_audio_player_module_does_not_require_portaudio_at_import_time():
+    """The CLI/web modules must remain importable on headless machines."""
+    import dialogue.audio_player as audio_player
+
+    assert hasattr(audio_player, "AudioPlayer")

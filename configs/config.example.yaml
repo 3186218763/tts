@@ -5,9 +5,18 @@ llm:
 
 tts:
   base_url: "http://127.0.0.1:9880"
-  ref_audio_path: "data/ref/huayin_ref.wav"
-  ref_text: "在这里填写参考音频对应的文字内容"
+  # Use an absolute path because api_v2.py runs from the GPT-SoVITS directory.
+  ref_audio_path: "/home/mtr/tt/tts/model/huayin_ref.wav"
+  ref_text: "所以和朋友一起吃饭的话比较好哦"
   ref_language: "zh"
+
+asr:
+  model: "small"
+  device: "auto"
+  compute_type: "auto"
+  language: "auto"
+  beam_size: 5
+  max_upload_mb: 15
 
 conversation:
   max_turns: 10

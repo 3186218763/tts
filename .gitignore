@@ -10,7 +10,14 @@ configs/config.yaml
 # 模型与数据
 model/*.ckpt
 model/*.pth
-data/
+!model/huayin-e15.ckpt
+!model/huayin_e8_s2536.pth
+data/*
+!data/training_assets.txt
+
+# 运行时日志和生成输出
+logs/
+outputs/
 
 # IDE
 .vscode/

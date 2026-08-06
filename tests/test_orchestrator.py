@@ -70,3 +70,41 @@ async def test_chat_flushes_partial_sentence():
     sentences = [s async for s in orch.chat("hi", conv)]
 
     assert "你好呀" in sentences
+
+
+@pytest.mark.asyncio
+async def test_tts_failure_skips_audio_but_keeps_text_and_history():
+    mock_llm = AsyncMock()
+    mock_llm.stream_chat = MagicMock(return_value=_async_iter(["第一句。", "第二句。"])
+    )
+    mock_tts = AsyncMock()
+    mock_tts.synthesize = AsyncMock(
+        side_effect=[RuntimeError("tts offline"), b"audio"]
+    )
+    mock_player = AsyncMock()
+    mock_player.play_wav_bytes = AsyncMock()
+
+    orch = Orchestrator(mock_llm, mock_tts, mock_player)
+    conv = Conversation()
+
+    sentences = [s async for s in orch.chat("hi", conv)]
+
+    assert sentences == ["第一句。", "第二句。"]
+    assert mock_player.play_wav_bytes.call_count == 1
+    assert conv.get_messages()[-1] == {"role": "assistant", "content": "第一句。第二句。"}
+
+
+@pytest.mark.asyncio
+async def test_empty_llm_response_is_not_saved():
+    mock_llm = AsyncMock()
+    mock_llm.stream_chat = MagicMock(return_value=_async_iter([]))
+    mock_tts = AsyncMock()
+    mock_player = AsyncMock()
+
+    orch = Orchestrator(mock_llm, mock_tts, mock_player)
+    conv = Conversation()
+
+    with pytest.raises(RuntimeError, match="empty"):
+        _ = [s async for s in orch.chat("hi", conv)]
+
+    assert conv.get_messages() == []
