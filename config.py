@@ -16,6 +16,13 @@ class TTSConfig:
     ref_audio_path: str
     ref_text: str
     ref_language: str
+    text_language: str = "auto"
+    top_k: int = 15
+    top_p: float = 1.0
+    temperature: float = 0.85
+    repetition_penalty: float = 1.35
+    speed_factor: float = 1.0
+    seed: int = 42
 
 
 @dataclass

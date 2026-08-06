@@ -131,6 +131,13 @@ def _default_service(config: AppConfig | None = None) -> WebChatService:
             ref_audio_path=config.tts.ref_audio_path,
             ref_text=config.tts.ref_text,
             ref_language=config.tts.ref_language,
+            text_language=config.tts.text_language,
+            top_k=config.tts.top_k,
+            top_p=config.tts.top_p,
+            temperature=config.tts.temperature,
+            repetition_penalty=config.tts.repetition_penalty,
+            speed_factor=config.tts.speed_factor,
+            seed=config.tts.seed,
         ),
         max_chars=config.max_sentence_chars,
     )
