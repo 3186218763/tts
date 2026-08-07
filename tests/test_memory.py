@@ -29,15 +29,46 @@ async def test_prepare_messages_compacts_old_turns_and_injects_memory():
     llm.summarize_chat.assert_awaited_once()
     assert messages[0]["role"] == "system"
     assert "真白花音" in messages[0]["content"]
-    assert messages[1]["role"] == "system"
-    assert "用户早先讨论了0和1" in messages[1]["content"]
-    assert [message["content"] for message in messages[2:]] == [
+    # 注入段（facts/examples）位于人设卡与记忆之间，均为 system 角色
+    memory_index = next(
+        index
+        for index, message in enumerate(messages)
+        if "用户早先讨论了0和1" in message["content"]
+    )
+    assert memory_index >= 2, "旧实现（无注入）下 memory_index==1，此断言保证红阶段有效"
+    assert all(message["role"] == "system" for message in messages[1:memory_index])
+    assert [message["content"] for message in messages[memory_index + 1 :]] == [
         "user-2",
         "assistant-2",
         "user-3",
         "assistant-3",
         "current",
     ]
+
+
+@pytest.mark.asyncio
+async def test_empty_conversation_skips_persona_injection():
+    conversation = Conversation(recent_turns=2, summary_trigger_turns=3)
+    llm = AsyncMock()
+
+    messages = await prepare_chat_messages(llm, conversation)
+
+    assert len(messages) == 1
+    assert messages[0]["role"] == "system"
+
+
+@pytest.mark.asyncio
+async def test_persona_context_uses_last_user_message():
+    conversation = Conversation(recent_turns=2, summary_trigger_turns=3)
+    conversation.add_user_message("为什么毕业")
+    conversation.add_assistant_message("……")
+    llm = AsyncMock()
+
+    messages = await prepare_chat_messages(llm, conversation)
+
+    facts = [m for m in messages if "<persona_facts>" in m["content"]]
+    assert facts, "应基于最后一条 user 消息注入事实"
+    assert "F012" in facts[0]["content"]
 
 
 @pytest.mark.asyncio

@@ -199,9 +199,14 @@ async def test_chat_injects_rolling_summary_before_recent_turns():
 
     messages = llm.stream_chat.call_args.args[0]
     assert messages[0]["role"] == "system"
-    assert messages[1]["role"] == "system"
-    assert "用户叫小明，喜欢爵士乐" in messages[1]["content"]
-    assert [message["content"] for message in messages[2:]] == [
+    memory_index = next(
+        index
+        for index, message in enumerate(messages)
+        if "用户叫小明，喜欢爵士乐" in message["content"]
+    )
+    assert memory_index >= 2, "注入段应位于人设卡与记忆之间"
+    assert all(message["role"] == "system" for message in messages[1:memory_index])
+    assert [message["content"] for message in messages[memory_index + 1 :]] == [
         "今天天气不错",
         "很适合散步。",
         "还记得我的爱好吗",
