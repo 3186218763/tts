@@ -59,10 +59,13 @@ def _load_json(path: Path) -> dict | None:
     try:
         with path.open(encoding="utf-8") as handle:
             data = json.load(handle)
-        return data if isinstance(data, dict) else None
     except (OSError, ValueError):
         logger.warning("persona 资产加载失败，已降级为空上下文: %s", path)
         return None
+    if not isinstance(data, dict):
+        logger.warning("persona 资产格式异常（顶层非对象），已降级为空上下文: %s", path)
+        return None
+    return data
 
 
 def _retrieve_facts(user_text: str, facts: list[dict]) -> tuple[list[dict], bool]:
@@ -147,42 +150,46 @@ def build_persona_context(
     """构建每轮注入的 system 消息（事实 + few-shot）；任何失败返回空列表。"""
     if not user_text or not user_text.strip():
         return []
-    facts_data = _load_json(_FACTS_PATH)
-    fewshot_data = _load_json(_FEWSHOT_PATH)
-    if facts_data is None or fewshot_data is None:
-        return []
-    messages: list[dict[str, str]] = []
+    try:
+        facts_data = _load_json(_FACTS_PATH)
+        fewshot_data = _load_json(_FEWSHOT_PATH)
+        if facts_data is None or fewshot_data is None:
+            return []
+        messages: list[dict[str, str]] = []
 
-    facts = facts_data.get("facts", [])
-    if facts:
-        hits, sensitive = _retrieve_facts(user_text, facts)
-        if sensitive:
-            # 敏感话题只触发回避提示：不注入事实、也不注入示例台词
-            messages.append({"role": "system", "content": _AVOID_HINT})
-            return messages
-        if hits:
-            body = "\n".join(f"- {fact['id']}：{fact['fact']}" for fact in hits)
+        facts = facts_data.get("facts", [])
+        if facts:
+            hits, sensitive = _retrieve_facts(user_text, facts)
+            if sensitive:
+                # 敏感话题只触发回避提示：不注入事实、也不注入示例台词
+                messages.append({"role": "system", "content": _AVOID_HINT})
+                return messages
+            if hits:
+                body = "\n".join(f"- {fact['id']}：{fact['fact']}" for fact in hits)
+                messages.append(
+                    {
+                        "role": "system",
+                        "content": (
+                            "<persona_facts>\n背景资料（仅作事实参考，不要复述）：\n"
+                            f"{body}\n</persona_facts>"
+                        ),
+                    }
+                )
+
+        rng = random.Random(seed) if seed is not None else random.Random()
+        examples = _pick_fewshot(user_text, fewshot_data, rng)
+        if examples:
+            body = "\n".join(f"- {text}" for text in examples)
             messages.append(
                 {
                     "role": "system",
                     "content": (
-                        "<persona_facts>\n背景资料（仅作事实参考，不要复述）：\n"
-                        f"{body}\n</persona_facts>"
+                        "<persona_examples>\n花音的真实台词（模仿其语气，不要逐字复述）：\n"
+                        f"{body}\n</persona_examples>"
                     ),
                 }
             )
-
-    rng = random.Random(seed) if seed is not None else random.Random()
-    examples = _pick_fewshot(user_text, fewshot_data, rng)
-    if examples:
-        body = "\n".join(f"- {text}" for text in examples)
-        messages.append(
-            {
-                "role": "system",
-                "content": (
-                    "<persona_examples>\n花音的真实台词（模仿其语气，不要逐字复述）：\n"
-                    f"{body}\n</persona_examples>"
-                ),
-            }
-        )
-    return messages
+        return messages
+    except Exception:
+        logger.warning("persona 上下文构建失败，已降级为空上下文")
+        return []
