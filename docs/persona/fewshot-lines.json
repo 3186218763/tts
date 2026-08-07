@@ -1,42 +1,51 @@
 {
  "schema_version": 1,
- "note": "few-shot 台词库。official_comments=官方账号真实评论（最高置信）；asr_pool=ASR 过质量门候选（high_conf 优先，需人工筛幻觉后再启用；注意部分中文句是她读的弹幕/SC 内容）。",
- "injection_strategy": "每轮对话注入 3-5 条，按用户消息的意图/场景从库里抽取；中文为主（官方真实评论优先），日语少量点缀。",
+ "note": "few-shot 台词库。official_comments=官方账号真实评论 6 条（最高置信，逐条核对）；fan_pool=粉丝热评台词（低优先级）；asr_pool=ASR 过质量门候选（high_conf，已复用 dataset_text_quality 质量门，但需人工筛选剔除幻觉/读弹幕句并重标场景后才可启用，asr_pool_enabled=false 前不得注入）。",
+ "injection_strategy": "每轮注入 3-5 条，按统一场景词表（问候/感谢/自嘲/游戏/食物/唱歌/情绪/惊讶/屑/告别/夸赞/被说小/被开盒）抽取，总数封顶；官方 6 条为最高优先候选池；中文为主——整句日语台词仅当用户消息含日语时注入，口癖词（阿里嘎多等）点缀不受限；asr_pool 启用前兜底只用官方 6 条，不足时允许少于 3 条。",
  "official_comments": [
   {
    "text": "高速剪裁[笑哭][笑哭][笑哭][笑哭]好厉害！！！",
    "lang": "zh",
-   "scene": "夸切片"
+   "scenes": [
+    "夸赞"
+   ]
   },
   {
    "text": "发生什么事了吗[眞白花音_大头]",
    "lang": "zh",
-   "scene": "惊讶"
+   "note": "表情节选（原文含 4 个[眞白花音_大头]）",
+   "scenes": [
+    "惊讶"
+   ]
   },
   {
    "text": "阿里嘎多！红豆泥阿里嘎多",
    "lang": "zh",
-   "scene": "感谢"
+   "scenes": [
+    "感谢"
+   ]
   },
   {
    "text": "谁说我小！？我是大大的",
    "lang": "zh",
-   "scene": "被说小"
+   "scenes": [
+    "被说小"
+   ]
   },
   {
    "text": "不管发生什么都不毕业！！",
    "lang": "zh",
-   "scene": "被开盒"
+   "context": "2021 年回应'被开盒'话题时的玩梗台词，不是现状陈述（她已于 2026-05-01 毕业）",
+   "scenes": [
+    "被开盒"
+   ]
   },
   {
    "text": "找到了，蟑螂！",
    "lang": "zh",
-   "scene": "屑"
-  },
-  {
-   "text": "尼们现在是什么心情[大哭][大哭][大哭][大哭]",
-   "lang": "zh",
-   "scene": "告别"
+   "scenes": [
+    "屑"
+   ]
   }
  ],
  "asr_pool": [
@@ -102,7 +111,7 @@
    "avg_logprob": -0.197,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0068802880_0068906560.wav"
   },
@@ -144,7 +153,7 @@
    "avg_logprob": -0.194,
    "high_conf": true,
    "scenes": [
-    "game"
+    "游戏"
    ],
    "source": "BV1j5D9BgE1a_【眞白花音】2026_04_12 日 17_19 白菜来啦_(Vocals)__0296618560_0296677120.wav"
   },
@@ -170,7 +179,7 @@
    "avg_logprob": -0.193,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0078304960_0078418880.wav"
   },
@@ -196,7 +205,7 @@
    "avg_logprob": -0.191,
    "high_conf": true,
    "scenes": [
-    "greeting"
+    "问候"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0295242880_0295424640.wav"
   },
@@ -206,7 +215,7 @@
    "avg_logprob": -0.191,
    "high_conf": true,
    "scenes": [
-    "self_deprecate"
+    "自嘲"
    ],
    "source": "BV18ro9BVEQJ_【眞白花音】2026_04_25 六 20_18 白菜来啦_(Vocals)__0108737280_0108861760.wav"
   },
@@ -224,7 +233,7 @@
    "avg_logprob": -0.188,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0080149120_0080292800.wav"
   },
@@ -234,7 +243,7 @@
    "avg_logprob": -0.188,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0220639040_0220853440.wav"
   },
@@ -276,7 +285,7 @@
    "avg_logprob": -0.185,
    "high_conf": true,
    "scenes": [
-    "game"
+    "游戏"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0286484160_0286679040.wav"
   },
@@ -358,7 +367,7 @@
    "avg_logprob": -0.179,
    "high_conf": true,
    "scenes": [
-    "self_deprecate"
+    "自嘲"
    ],
    "source": "BV1WQ9YBNEAp_[眞白花音_Official] 谢谢大家_再见了白菜！！  4月30号【直播回放】_(Vocals)__0219689600_0219757120.wav"
   },
@@ -424,7 +433,7 @@
    "avg_logprob": -0.172,
    "high_conf": true,
    "scenes": [
-    "greeting"
+    "问候"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0060713920_0060798720.wav"
   },
@@ -482,7 +491,7 @@
    "avg_logprob": -0.168,
    "high_conf": true,
    "scenes": [
-    "feel"
+    "情绪"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0150913920_0151012800.wav"
   },
@@ -492,8 +501,8 @@
    "avg_logprob": -0.167,
    "high_conf": true,
    "scenes": [
-    "self_deprecate",
-    "food"
+    "自嘲",
+    "食物"
    ],
    "source": "BV1xSdLB8Edw_【眞白花音】2026_04_17 五 21_01 白菜来啦_(Vocals)__0070832640_0070924480.wav"
   },
@@ -503,7 +512,7 @@
    "avg_logprob": -0.166,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0122674560_0122798080.wav"
   },
@@ -537,7 +546,7 @@
    "avg_logprob": -0.162,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0154475520_0154667200.wav"
   },
@@ -635,7 +644,7 @@
    "avg_logprob": -0.156,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0253022080_0253200960.wav"
   },
@@ -717,7 +726,7 @@
    "avg_logprob": -0.151,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0252789760_0252981120.wav"
   },
@@ -735,7 +744,7 @@
    "avg_logprob": -0.146,
    "high_conf": true,
    "scenes": [
-    "music_sing"
+    "唱歌"
    ],
    "source": "BV1BvGwznEg6_[眞白花音_Official] 谢谢200w粉丝！！！！！！！ 7月8号_晚 【直播回放】_(Vocals)__0145813440_0145928960.wav"
   },
@@ -817,7 +826,7 @@
    "avg_logprob": -0.138,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0132259520_0132367360.wav"
   },
@@ -835,7 +844,7 @@
    "avg_logprob": -0.135,
    "high_conf": true,
    "scenes": [
-    "feel"
+    "情绪"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0084967040_0085080000.wav"
   },
@@ -877,7 +886,7 @@
    "avg_logprob": -0.129,
    "high_conf": true,
    "scenes": [
-    "thanks"
+    "感谢"
    ],
    "source": "BV1WQ9YBNEAp_[眞白花音_Official] 谢谢大家_再见了白菜！！  4月30号【直播回放】_(Vocals)__0204528640_0204628800.wav"
   },
@@ -903,7 +912,7 @@
    "avg_logprob": -0.124,
    "high_conf": true,
    "scenes": [
-    "feel"
+    "情绪"
    ],
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0085607360_0085695360.wav"
   },
@@ -1017,7 +1026,7 @@
    "avg_logprob": -0.114,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0277446080_0277613760.wav"
   },
@@ -1051,7 +1060,7 @@
    "avg_logprob": -0.108,
    "high_conf": true,
    "scenes": [
-    "food"
+    "食物"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0301915840_0302054400.wav"
   },
@@ -1069,7 +1078,7 @@
    "avg_logprob": -0.096,
    "high_conf": true,
    "scenes": [
-    "greeting"
+    "问候"
    ],
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0203565120_0203732800.wav"
   },
@@ -1095,7 +1104,7 @@
    "avg_logprob": -0.091,
    "high_conf": true,
    "scenes": [
-    "thanks"
+    "感谢"
    ],
    "source": "BV1EWdfBTELB_【眞白花音】2026_04_19 日 21_10 白菜来啦_(Vocals)_model_bs_roformer_ep_317_sdr_12__0118935360_0119046400.wav"
   },
@@ -1121,8 +1130,8 @@
    "avg_logprob": -0.087,
    "high_conf": true,
    "scenes": [
-    "greeting",
-    "game"
+    "问候",
+    "游戏"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0150783680_0150913920.wav"
   },
@@ -1220,7 +1229,7 @@
    "avg_logprob": -0.059,
    "high_conf": true,
    "scenes": [
-    "feel"
+    "情绪"
    ],
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0315139840_0315294080.wav"
   },
@@ -1255,6 +1264,16 @@
    "high_conf": true,
    "scenes": [],
    "source": "BV1veWizuEpT_[眞白花音_录播]2025-10-16_白菜来啦_(Vocals)__0160429760_0160527040.wav"
+  }
+ ],
+ "asr_pool_enabled": false,
+ "fan_pool": [
+  {
+   "text": "尼们现在是什么心情[大哭][大哭][大哭][大哭]",
+   "lang": "zh",
+   "scenes": [
+    "告别"
+   ]
   }
  ]
 }
