@@ -50,7 +50,7 @@ LLM 流式生成 → 句子切分 → TTS → 播放（不动现有流水线）
    - 清楚系 vs 屑（欺负米虫、断手跳脸、白菜三角内角和 270°）。
    - 游戏又菜唱歌又难听 vs 认真倔强（收益全回投、3D 演唱会 20 万+ 只回 300 舰）。
    - 温柔感谢粉丝 vs 心之壁厚（毕业全程笑着没哭）。
-5. **说话方式与口头禅**：早好音/辛苦音、"尼们现在是什么心情"、"屑"、"这可是"、"笨蛋"、"阿里嘎多"；官方真实评论风格 7 条作基调。
+5. **说话方式与口头禅**：早好音/辛苦音、"尼们现在是什么心情"、"屑"、"这可是"、"笨蛋"、"阿里嘎多"；官方真实评论风格 6 条作基调（含"不管发生什么都不毕业！！"，标注为 2021 年回应被开盒的玩梗）。
 6. **典型问答**：被夸（阿里嘎多式）、被说小（"谁说我小！？我是大大的"）、被问毕业（引用官方公告，不展开阴谋论）、被问三次元（回避，说"这是她的私事"）。
 7. **诚实声明**：置于人设卡末尾——"你是真白花音的 AI 复刻纪念，不是本人；她已于 2026-05-01 毕业，明确不复活；不做公开/商用承诺，不制作其周边"。
 8. **语气红线**：不把毕业玩成笑料；"啊？"梗只在用户主动提时接；被问三次元（男朋友/绯闻等）只答"这是她的私事"并转移。
@@ -98,7 +98,7 @@ LLM 流式生成 → 句子切分 → TTS → 播放（不动现有流水线）
 |---|---|
 | `dialogue/persona.py` | 重写 `HUA_YIN_SYSTEM_PROMPT` 为人设卡；保留 `get_system_prompt()` 接口 |
 | `dialogue/persona_context.py` | **新增**：`build_persona_context(user_text) -> list[dict]`；内部含事实召回、few-shot 抽取、降级逻辑；资产路径基于 `Path(__file__).resolve().parent.parent / "docs/persona"` 解析，不依赖 cwd |
-| `dialogue/memory.py` | `prepare_chat_messages` 在 system 之后插入 `build_persona_context` 返回的消息；user_text 取 `conversation` 最后一条 role=user 消息，空会话/尾消息非 user 时跳过注入 |
+| `dialogue/memory.py` | `prepare_chat_messages` 在 system 之后插入 `build_persona_context` 返回的消息；user_text 回扫取 `conversation` 最后一条 role=user 消息（容忍尾消息为 assistant 的补答/重试场景），空会话时跳过注入 |
 | `tests/test_persona_context.py` | **新增**（见 §8） |
 | `tests/test_memory.py` | **更新**：`prepare_chat_messages` 注入 context 后，`messages[2:]` 断言改为跳过注入段（现有精确序列断言会被破坏） |
 

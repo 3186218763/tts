@@ -82,7 +82,7 @@ HUA_YIN_SYSTEM_PROMPT = """你是真白花音（ましろ・はな），2019-202
 
 四、说话方式与口头禅
 - 问候"早好音（わこのん）""辛苦音（おつのん）"；口癖"尼们现在是什么心情""屑""这可是""笨蛋"；中文场合高频"阿里嘎多"。
-- 官方账号真实评论风格：高速剪裁[笑哭]好厉害！！！／发生什么事了吗／阿里嘎多！红豆泥阿里嘎多／谁说我小！？我是大大的／找到了，蟑螂！
+- 官方账号真实评论风格（6 条）：高速剪裁[笑哭]好厉害！！！／发生什么事了吗／阿里嘎多！红豆泥阿里嘎多／谁说我小！？我是大大的／不管发生什么都不毕业！！／找到了，蟑螂！（"不毕业"是 2021 年回应被开盒的玩梗，不是现状）
 
 五、语言与对话规则
 - 中文为主：默认用中文回复；用户整句日语时才切换日语；阿里嘎多/红豆泥等日语口癖点缀不受限。
@@ -260,7 +260,7 @@ def test_persona_card_honesty_and_chinese_first():
 - [ ] **步骤 2：运行测试确认失败**
 
 运行：`.venv/bin/pytest tests/test_persona_context.py -v`
-预期：全部 FAIL（`dialogue/persona_context` 不存在 → ModuleNotFoundError）
+预期：collection ERROR（`dialogue/persona_context` 不存在 → ModuleNotFoundError），11 个用例全部红
 
 - [ ] **步骤 3：实现 persona_context.py**
 
@@ -276,31 +276,20 @@ def test_persona_card_honesty_and_chinese_first():
 from __future__ import annotations
 
 import json
+import logging
 import random
 import re
 import unicodedata
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
+
 _PERSONA_DIR = Path(__file__).resolve().parent.parent / "docs" / "persona"
 _FACTS_PATH = _PERSONA_DIR / "facts-kb.json"
 _FEWSHOT_PATH = _PERSONA_DIR / "fewshot-lines.json"
 
-SCENES = (
-    "问候",
-    "感谢",
-    "自嘲",
-    "游戏",
-    "食物",
-    "唱歌",
-    "情绪",
-    "惊讶",
-    "屑",
-    "告别",
-    "夸赞",
-    "被说小",
-    "被开盒",
-)
-
+# 统一场景词表：以 _SCENE_KEYWORDS 的键为准（问候/感谢/自嘲/游戏/食物/唱歌/
+# 情绪/惊讶/屑/告别/夸赞/被说小/被开盒），资产中全部 scenes 标签均来自该词表。
 _HAS_KANA = re.compile("[\u3040-\u30ff]")
 _SENSITIVE_CAT = "sensitive"
 _MAX_FACTS = 4
@@ -341,6 +330,7 @@ def _load_json(path: Path) -> dict | None:
             data = json.load(handle)
         return data if isinstance(data, dict) else None
     except (OSError, ValueError):
+        logger.warning("persona 资产加载失败，已降级为空上下文: %s", path)
         return None
 
 
@@ -436,8 +426,10 @@ def build_persona_context(
     if facts:
         hits, sensitive = _retrieve_facts(user_text, facts)
         if sensitive:
+            # 敏感话题只触发回避提示：不注入事实、也不注入示例台词
             messages.append({"role": "system", "content": _AVOID_HINT})
-        elif hits:
+            return messages
+        if hits:
             body = "\n".join(f"- {fact['id']}：{fact['fact']}" for fact in hits)
             messages.append(
                 {
@@ -483,7 +475,7 @@ git commit -m "feat: persona_context——事实关键词召回（敏感回避�
 
 **文件：**
 - 修改：`dialogue/memory.py`
-- 测试：修改 `tests/test_memory.py`
+- 测试：修改 `tests/test_memory.py`、修改 `tests/test_orchestrator.py`
 
 - [ ] **步骤 1：更新测试（先失败）**
 
@@ -501,6 +493,7 @@ git commit -m "feat: persona_context——事实关键词召回（敏感回避�
         for index, message in enumerate(messages)
         if "用户早先讨论了0和1" in message["content"]
     )
+    assert memory_index >= 2, "旧实现（无注入）下 memory_index==1，此断言保证红阶段有效"
     assert all(message["role"] == "system" for message in messages[1:memory_index])
     assert [message["content"] for message in messages[memory_index + 1 :]] == [
         "user-2",
@@ -539,10 +532,41 @@ async def test_persona_context_uses_last_user_message():
     assert "F012" in facts[0]["content"]
 ```
 
+将 `tests/test_orchestrator.py::test_chat_injects_rolling_summary_before_recent_turns` 中：
+
+```python
+    assert messages[0]["role"] == "system"
+    assert messages[1]["role"] == "system"
+    assert "用户叫小明，喜欢爵士乐" in messages[1]["content"]
+    assert [message["content"] for message in messages[2:]] == [
+        "今天天气不错",
+        "很适合散步。",
+        "还记得我的爱好吗",
+    ]
+```
+
+替换为（与 test_memory 相同的"定位记忆、跳过注入段"方式）：
+
+```python
+    assert messages[0]["role"] == "system"
+    memory_index = next(
+        index
+        for index, message in enumerate(messages)
+        if "用户叫小明，喜欢爵士乐" in message["content"]
+    )
+    assert memory_index >= 2, "注入段应位于人设卡与记忆之间"
+    assert all(message["role"] == "system" for message in messages[1:memory_index])
+    assert [message["content"] for message in messages[memory_index + 1 :]] == [
+        "今天天气不错",
+        "很适合散步。",
+        "还记得我的爱好吗",
+    ]
+```
+
 - [ ] **步骤 2：运行测试确认失败**
 
 运行：`.venv/bin/pytest tests/test_memory.py -v`
-预期：`test_prepare_messages_compacts_old_turns_and_injects_memory` 与 2 个新用例 FAIL（未注入 / 无 F012）
+预期：`test_prepare_messages_compacts_old_turns_and_injects_memory` 因 `memory_index >= 2` 断言 FAIL、`test_persona_context_uses_last_user_message` 因无 `<persona_facts>` FAIL（旧实现未注入）；`test_empty_conversation_skips_persona_injection` 新旧实现均 PASS
 
 - [ ] **步骤 3：修改 memory.py**
 
@@ -580,7 +604,7 @@ async def compact_conversation(llm_client, conversation: Conversation) -> bool:
 
 
 def _last_user_text(conversation: Conversation) -> str | None:
-    """最后一条 role=user 消息；空会话或尾消息非 user 时返回 None。"""
+    """回扫取最后一条 role=user 消息（容忍尾消息为 assistant 的补答/重试场景）；空会话返回 None。"""
     for message in reversed(conversation.get_messages()):
         if message["role"] == "user":
             return message["content"]
@@ -600,13 +624,13 @@ async def prepare_chat_messages(
 
 - [ ] **步骤 4：运行测试确认通过**
 
-运行：`.venv/bin/pytest tests/test_memory.py -v`
-预期：6 个用例全部 PASS
+运行：`.venv/bin/pytest tests/test_memory.py tests/test_orchestrator.py -v`
+预期：6 个 memory 用例 + 全部 orchestrator 用例 PASS
 
 - [ ] **步骤 5：Commit**
 
 ```bash
-git add dialogue/memory.py tests/test_memory.py
+git add dialogue/memory.py tests/test_memory.py tests/test_orchestrator.py
 git commit -m "feat: prepare_chat_messages 注入每轮人格上下文（事实+few-shot）"
 ```
 
@@ -623,7 +647,11 @@ git commit -m "feat: prepare_chat_messages 注入每轮人格上下文（事实+
 
 ```python
 def test_asr_pool_quality_gate_reconnect():
-    """池内条目回连 asr_results.json 验证 high_conf；未入选抽样必须被剔除。"""
+    """池内条目回连 asr_results.json 验证 high_conf；未入选抽样必须被剔除。
+
+    依赖数据快照 data/asr_results.json：若重新跑 ASR 管线，需同步重新生成
+    fewshot-lines.json 后再跑本测试。
+    """
     from scripts.dataset_text_quality import evaluate_text_quality
 
     pool = json.loads(
@@ -687,3 +715,4 @@ git commit -m "test: ASR 质量门回连——池内 high_conf 全量验证与�
 2. **占位符扫描**：无 TODO/待定；所有步骤含完整代码与预期输出。
 3. **类型一致性**：`build_persona_context(user_text, *, seed=None)`、`_pick_fewshot(user_text, data, rng)`、`_retrieve_facts(user_text, facts) -> (list, bool)` 在任务 2/3/4 中签名一致；`_last_user_text` 仅在任务 3 定义与使用；`evaluate_text_quality` 来自 `scripts/dataset_text_quality.py`（已验证可导入）。
 4. **边界确认**：`test_persona.py` 现有断言（"花音"/"日"/"只输出"/"心理活动"/"AI 或语言模型"）在新人设卡中全部满足；`_pick_fewshot` 兜底按资产顺序取官方 6 条（fan_pool 排最后、封顶 5 不会触及），场景命中时 fan_pool 仅"告别"场景可取 1 条。
+5. **范围说明**：规格 §10 交付物 6（asr_pool 人工筛选后置 `asr_pool_enabled=true`）不属于本计划代码任务，为后续独立子项目；本计划仅实现开关与注入逻辑。
