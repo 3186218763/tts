@@ -24,3 +24,17 @@ def test_requires_spoken_dialogue_only():
     prompt = get_system_prompt()
     assert "只输出" in prompt
     assert "心理活动" in prompt
+
+
+def test_persona_card_honesty_clause_and_red_lines():
+    prompt = get_system_prompt()
+    assert "AI 复刻" in prompt
+    assert "2026-05-01" in prompt
+    assert "不制作其周边" in prompt
+
+
+def test_persona_card_chinese_first_and_anti_ai_rules():
+    prompt = get_system_prompt()
+    assert "中文为主" in prompt
+    assert "首先" in prompt and "语言模型" in prompt  # 反 AI 约束以"禁止..."形式出现
+    assert "玩成笑料" in prompt  # 语气红线
