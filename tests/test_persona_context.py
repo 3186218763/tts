@@ -1,4 +1,5 @@
 import json
+import pytest
 import random
 import re
 from pathlib import Path
@@ -130,8 +131,15 @@ def test_asr_pool_quality_gate_reconnect():
     pool = json.loads(
         (ROOT / "docs/persona/fewshot-lines.json").read_text(encoding="utf-8")
     )["asr_pool"]
+    asr_path = ROOT / "data/asr_results.json"
+    if not asr_path.exists():
+        pytest.skip(
+            "缺少 data/asr_results.json 快照：该文件被 gitignore，fresh clone/CI "
+            "上不存在；请先运行 ASR 管线重新生成快照（并同步重新生成 "
+            "fewshot-lines.json）后再跑本测试。"
+        )
     asr = json.loads(
-        (ROOT / "data/asr_results.json").read_text(encoding="utf-8")
+        asr_path.read_text(encoding="utf-8")
     )
     by_path = {record["path"].rsplit("/", 1)[-1]: record for record in asr}
     pool_texts = {item["text"] for item in pool}
@@ -146,6 +154,11 @@ def test_asr_pool_quality_gate_reconnect():
 
     rng = random.Random(0)
     candidates = [r for r in asr if r.get("avg_logprob") is not None]
+    if not candidates:
+        pytest.skip(
+            "data/asr_results.json 中没有带 avg_logprob 的候选条目，无法抽样验证；"
+            "请重新生成 ASR 快照后再跑本测试。"
+        )
     sample = rng.sample(candidates, min(100, len(candidates)))
     leaked = 0
     for record in sample:
