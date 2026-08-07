@@ -2,6 +2,11 @@
 
 import httpx
 
+from .speech_text import normalize_speech_text, resolve_text_language
+
+
+TEXT_SPLIT_METHODS = {"cut0", "cut1", "cut2", "cut3", "cut4", "cut5"}
+
 
 class TTSClient:
     """调用 GPT-SoVITS API Server 将文本合成为语音。"""
@@ -19,6 +24,7 @@ class TTSClient:
         repetition_penalty: float = 1.35,
         speed_factor: float = 1.0,
         seed: int = 42,
+        text_split_method: str = "cut5",
     ):
         if top_k < 1:
             raise ValueError("top_k must be positive")
@@ -30,6 +36,8 @@ class TTSClient:
             raise ValueError("repetition_penalty must be positive")
         if speed_factor <= 0:
             raise ValueError("speed_factor must be positive")
+        if text_split_method not in TEXT_SPLIT_METHODS:
+            raise ValueError("unsupported text_split_method")
         self._base_url = base_url.rstrip("/")
         self._ref_audio_path = ref_audio_path
         self._ref_text = ref_text
@@ -41,6 +49,7 @@ class TTSClient:
         self._repetition_penalty = repetition_penalty
         self._speed_factor = speed_factor
         self._seed = seed
+        self._text_split_method = text_split_method
 
     async def check_available(self) -> None:
         """Raise a user-facing error unless the local API responds."""
@@ -55,17 +64,22 @@ class TTSClient:
 
     async def synthesize(self, text: str, text_language: str | None = None) -> bytes:
         """将文本合成为 WAV 格式音频字节。"""
-        language = text_language or self._text_language
+        normalized_text = normalize_speech_text(text)
+        if normalized_text is None:
+            raise ValueError("text contains no speakable content")
+        language = resolve_text_language(
+            normalized_text, text_language or self._text_language
+        )
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{self._base_url}/tts",
                 json={
-                    "text": text,
+                    "text": normalized_text,
                     "text_lang": language,
                     "ref_audio_path": self._ref_audio_path,
                     "prompt_text": self._ref_text,
                     "prompt_lang": self._ref_language,
-                    "text_split_method": "cut0",
+                    "text_split_method": self._text_split_method,
                     "top_k": self._top_k,
                     "top_p": self._top_p,
                     "temperature": self._temperature,

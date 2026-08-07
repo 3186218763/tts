@@ -8,6 +8,8 @@ import base64
 import json
 import re
 from collections.abc import AsyncIterator, Mapping
+from contextlib import suppress
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -15,8 +17,9 @@ from config import AppConfig, load_config
 from dialogue.asr_client import WhisperTranscriber
 from dialogue.conversation import Conversation
 from dialogue.llm_client import LLMClient
-from dialogue.persona import get_system_prompt
+from dialogue.memory import prepare_chat_messages
 from dialogue.sentence_streamer import SentenceStreamer
+from dialogue.speech_text import normalize_speech_text
 from dialogue.tts_client import TTSClient
 
 
@@ -34,6 +37,13 @@ AUDIO_SUFFIXES = {
     "audio/mp4": ".mp4",
     "audio/mpeg": ".mp3",
 }
+
+
+@dataclass
+class _SessionState:
+    conversation: Conversation
+    lock: asyncio.Lock
+    reservations: int = 0
 
 
 def parse_chat_request(payload: Mapping[str, Any]) -> tuple[str, str]:
@@ -65,50 +75,77 @@ def sse_event(payload: Mapping[str, Any]) -> str:
 class WebChatService:
     """Stream sentence and audio events while keeping one conversation history."""
 
-    def __init__(self, llm_client, tts_client, *, max_chars: int = 25):
+    def __init__(
+        self, llm_client, tts_client, *, max_chars: int = 50, min_chars: int = 4
+    ):
         self._llm = llm_client
         self._tts = tts_client
         self._max_chars = max_chars
+        self._min_chars = min_chars
 
     async def stream(
         self, user_text: str, conversation: Conversation
     ) -> AsyncIterator[dict[str, Any]]:
         conversation.add_user_message(user_text)
-        messages = [{"role": "system", "content": get_system_prompt()}]
-        messages.extend(conversation.get_messages())
-
-        streamer = SentenceStreamer(self._max_chars)
-        full_response = ""
+        committed = False
         pending_audio = None
-
         try:
-            async for token in self._llm.stream_chat(messages):
-                full_response += token
-                for sentence in streamer.add_token(token):
-                    if pending_audio is not None:
-                        yield await self._audio_event(pending_audio)
-                    yield {"type": "sentence", "text": sentence}
-                    pending_audio = asyncio.create_task(self._tts.synthesize(sentence))
+            try:
+                messages = await prepare_chat_messages(self._llm, conversation)
+                streamer = SentenceStreamer(
+                    self._max_chars, min_chars=self._min_chars
+                )
+                full_response = ""
 
-            remaining = streamer.flush()
-            if remaining:
+                async for token in self._llm.stream_chat(messages):
+                    full_response += token
+                    for raw_sentence in streamer.add_token(token):
+                        sentence = normalize_speech_text(raw_sentence)
+                        if not sentence:
+                            continue
+                        if pending_audio is not None:
+                            yield await self._audio_event(pending_audio)
+                        yield {"type": "sentence", "text": sentence}
+                        pending_audio = asyncio.create_task(
+                            self._tts.synthesize(sentence)
+                        )
+
+                remaining = streamer.flush()
+                if remaining:
+                    sentence = normalize_speech_text(remaining)
+                    if sentence:
+                        if pending_audio is not None:
+                            yield await self._audio_event(pending_audio)
+                        yield {"type": "sentence", "text": sentence}
+                        pending_audio = asyncio.create_task(
+                            self._tts.synthesize(sentence)
+                        )
                 if pending_audio is not None:
                     yield await self._audio_event(pending_audio)
-                yield {"type": "sentence", "text": remaining}
-                pending_audio = asyncio.create_task(self._tts.synthesize(remaining))
-            if pending_audio is not None:
-                yield await self._audio_event(pending_audio)
-            if not full_response.strip():
-                raise RuntimeError("LLM returned an empty response")
-        except Exception as exc:
-            if pending_audio is not None:
-                pending_audio.cancel()
-            conversation.rollback_last_user_message()
-            yield {"type": "error", "message": str(exc)}
-            return
+                normalized_response = normalize_speech_text(full_response)
+                if normalized_response is None:
+                    raise RuntimeError("LLM returned an empty response")
+            except asyncio.CancelledError:
+                await self._cancel_audio(pending_audio)
+                raise
+            except Exception as exc:
+                await self._cancel_audio(pending_audio)
+                yield {"type": "error", "message": str(exc)}
+                return
 
-        conversation.add_assistant_message(full_response)
-        yield {"type": "done"}
+            conversation.add_assistant_message(normalized_response)
+            committed = True
+            yield {"type": "done"}
+        finally:
+            if not committed:
+                conversation.rollback_last_user_message()
+
+    async def _cancel_audio(self, task) -> None:
+        if task is None:
+            return
+        task.cancel()
+        with suppress(asyncio.CancelledError, Exception):
+            await task
 
     async def _audio_event(self, task) -> dict[str, str]:
         try:
@@ -125,6 +162,9 @@ def _default_service(config: AppConfig | None = None) -> WebChatService:
             api_key=config.llm.api_key,
             base_url=config.llm.base_url,
             model=config.llm.model,
+            temperature=config.llm.temperature,
+            max_tokens=config.llm.max_tokens,
+            frequency_penalty=config.llm.frequency_penalty,
         ),
         TTSClient(
             base_url=config.tts.base_url,
@@ -138,8 +178,10 @@ def _default_service(config: AppConfig | None = None) -> WebChatService:
             repetition_penalty=config.tts.repetition_penalty,
             speed_factor=config.tts.speed_factor,
             seed=config.tts.seed,
+            text_split_method=config.tts.text_split_method,
         ),
         max_chars=config.max_sentence_chars,
+        min_chars=config.min_sentence_chars,
     )
 
 
@@ -185,17 +227,51 @@ def create_app(
         )
         default_asr_language = runtime_config.asr.language
     app = FastAPI(title="AI 花音", version="0.1.0")
-    conversations: dict[str, Conversation] = {}
+    sessions: dict[str, _SessionState] = {}
 
-    def get_conversation(session_id: str) -> Conversation:
-        conversation = conversations.get(session_id)
-        if conversation is None:
-            if len(conversations) >= max_sessions:
-                conversations.pop(next(iter(conversations)))
-            conversation = conversations[session_id] = Conversation(
-                max_turns=(runtime_config.max_turns if runtime_config else 10)
+    def evict_oldest_idle_session() -> bool:
+        for candidate_id, candidate in tuple(sessions.items()):
+            if candidate.reservations == 0 and not candidate.lock.locked():
+                sessions.pop(candidate_id)
+                return True
+        return False
+
+    def trim_idle_sessions() -> None:
+        while len(sessions) > max_sessions and evict_oldest_idle_session():
+            pass
+
+    def get_session(session_id: str) -> _SessionState:
+        state = sessions.pop(session_id, None)
+        if state is None:
+            # Busy sessions may temporarily put the cache above its target;
+            # preserving an active history is more important than a hard cap.
+            while len(sessions) >= max_sessions:
+                if not evict_oldest_idle_session():
+                    break
+            state = _SessionState(
+                conversation=Conversation(
+                    recent_turns=(runtime_config.max_turns if runtime_config else 8),
+                    summary_trigger_turns=(
+                        runtime_config.summary_trigger_turns
+                        if runtime_config
+                        else 12
+                    ),
+                    summary_trigger_chars=(
+                        runtime_config.summary_trigger_chars
+                        if runtime_config
+                        else 12_000
+                    ),
+                    summary_max_chars=(
+                        runtime_config.summary_max_chars
+                        if runtime_config
+                        else 1_800
+                    ),
+                ),
+                lock=asyncio.Lock(),
             )
-        return conversation
+        # Reinsert an existing session so insertion order acts as LRU order.
+        sessions[session_id] = state
+        return state
 
     @app.get("/", response_class=HTMLResponse)
     async def index():
@@ -240,11 +316,21 @@ def create_app(
         except (ValueError, TypeError, json.JSONDecodeError) as exc:
             return JSONResponse({"error": str(exc)}, status_code=400)
 
-        conversation = get_conversation(session_id)
+        session = get_session(session_id)
+        # Reserve before StreamingResponse starts consuming the generator so
+        # queued and in-flight sessions cannot be evicted in between.
+        session.reservations += 1
 
         async def events():
-            async for event in chat_service.stream(message, conversation):
-                yield sse_event(event)
+            try:
+                async with session.lock:
+                    async for event in chat_service.stream(
+                        message, session.conversation
+                    ):
+                        yield sse_event(event)
+            finally:
+                session.reservations -= 1
+                trim_idle_sessions()
 
         return StreamingResponse(
             events(),
@@ -314,7 +400,15 @@ def create_app(
             _, session_id = parse_chat_request({"message": "placeholder", "session_id": session_id})
         except (ValueError, TypeError, AttributeError, json.JSONDecodeError) as exc:
             return JSONResponse({"error": str(exc)}, status_code=400)
-        conversations.pop(session_id, None)
+        session = sessions.get(session_id)
+        if session is not None:
+            session.reservations += 1
+            try:
+                async with session.lock:
+                    session.conversation.clear()
+            finally:
+                session.reservations -= 1
+                trim_idle_sessions()
         return {"status": "ok"}
 
     return app

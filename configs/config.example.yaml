@@ -1,7 +1,12 @@
 llm:
   api_key: "sk-your-deepseek-api-key"
   base_url: "https://api.deepseek.com"
-  model: "deepseek-chat"
+  model: "deepseek-v4-flash"
+  # Voice-oriented replies should be concise and varied without becoming
+  # unpredictable. Conversation summaries use a separate low temperature.
+  temperature: 0.8
+  max_tokens: 400
+  frequency_penalty: 0.15
 
 tts:
   base_url: "http://127.0.0.1:9880"
@@ -18,6 +23,7 @@ tts:
   repetition_penalty: 1.35
   speed_factor: 1.0
   seed: 42
+  text_split_method: "cut5"
 
 asr:
   model: "small"
@@ -28,7 +34,12 @@ asr:
   max_upload_mb: 15
 
 conversation:
-  max_turns: 10
+  # Keep recent turns verbatim and compact older complete turns into memory.
+  recent_turns: 8
+  summary_trigger_turns: 12
+  summary_trigger_chars: 12000
+  summary_max_chars: 1800
 
 streaming:
-  max_sentence_chars: 25
+  min_sentence_chars: 4
+  max_sentence_chars: 50

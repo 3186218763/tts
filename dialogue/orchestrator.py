@@ -4,8 +4,9 @@ import asyncio
 from collections.abc import AsyncIterator
 
 from .conversation import Conversation
-from .persona import get_system_prompt
+from .memory import prepare_chat_messages
 from .sentence_streamer import SentenceStreamer
+from .speech_text import normalize_speech_text
 
 
 class Orchestrator:
@@ -16,59 +17,95 @@ class Orchestrator:
     chat() 逐句 yield 文字供前端显示，音频在后台并行播放。
     """
 
-    def __init__(self, llm_client, tts_client, audio_player, max_chars: int = 25):
+    def __init__(
+        self,
+        llm_client,
+        tts_client,
+        audio_player,
+        max_chars: int = 50,
+        min_chars: int = 4,
+    ):
         self._llm = llm_client
         self._tts = tts_client
         self._player = audio_player
         self._max_chars = max_chars
+        self._min_chars = min_chars
 
     async def chat(
         self, user_text: str, conversation: Conversation
     ) -> AsyncIterator[str]:
         """处理用户输入，逐句 yield 文字（供显示），后台播放音频。"""
         conversation.add_user_message(user_text)
-
-        messages = [{"role": "system", "content": get_system_prompt()}]
-        messages.extend(conversation.get_messages())
-
-        streamer = SentenceStreamer(self._max_chars)
-        full_response = ""
-
-        tts_queue: asyncio.Queue[str | None] = asyncio.Queue()
-
-        async def tts_worker():
-            while True:
-                sentence = await tts_queue.get()
-                if sentence is None:
-                    break
-                try:
-                    audio = await self._tts.synthesize(sentence)
-                    await self._player.play_wav_bytes(audio)
-                except Exception:
-                    # A TTS outage must not discard the text response or stop
-                    # later sentences from being processed.
-                    continue
-
-        worker_task = asyncio.create_task(tts_worker())
-
+        committed = False
         try:
-            async for token in self._llm.stream_chat(messages):
-                full_response += token
-                for sentence in streamer.add_token(token):
-                    await tts_queue.put(sentence)
-                    yield sentence
+            messages = await prepare_chat_messages(self._llm, conversation)
+            streamer = SentenceStreamer(self._max_chars, min_chars=self._min_chars)
+            full_response = ""
 
-            remaining = streamer.flush()
-            if remaining:
-                await tts_queue.put(remaining)
-                yield remaining
-            if not full_response.strip():
-                raise RuntimeError("LLM returned an empty response")
-        except Exception:
-            conversation.rollback_last_user_message()
-            raise
+            tts_queue: asyncio.Queue[str | None] = asyncio.Queue()
+            audio_queue: asyncio.Queue[bytes | None] = asyncio.Queue()
+
+            async def tts_worker():
+                try:
+                    while True:
+                        sentence = await tts_queue.get()
+                        if sentence is None:
+                            break
+                        try:
+                            audio = await self._tts.synthesize(sentence)
+                        except Exception:
+                            # TTS failures do not discard the text response or
+                            # prevent later sentences from being processed.
+                            continue
+                        await audio_queue.put(audio)
+                finally:
+                    await audio_queue.put(None)
+
+            async def playback_worker():
+                while True:
+                    audio = await audio_queue.get()
+                    if audio is None:
+                        break
+                    try:
+                        await self._player.play_wav_bytes(audio)
+                    except Exception:
+                        continue
+
+            tts_task = asyncio.create_task(tts_worker())
+            playback_task = asyncio.create_task(playback_worker())
+            response_ready = False
+            try:
+                async for token in self._llm.stream_chat(messages):
+                    full_response += token
+                    for raw_sentence in streamer.add_token(token):
+                        sentence = normalize_speech_text(raw_sentence)
+                        if sentence:
+                            await tts_queue.put(sentence)
+                            yield sentence
+
+                remaining = streamer.flush()
+                if remaining:
+                    sentence = normalize_speech_text(remaining)
+                    if sentence:
+                        await tts_queue.put(sentence)
+                        yield sentence
+                normalized_response = normalize_speech_text(full_response)
+                if normalized_response is None:
+                    raise RuntimeError("LLM returned an empty response")
+                response_ready = True
+            finally:
+                if response_ready:
+                    await tts_queue.put(None)
+                    await asyncio.gather(tts_task, playback_task)
+                else:
+                    tts_task.cancel()
+                    playback_task.cancel()
+                    await asyncio.gather(
+                        tts_task, playback_task, return_exceptions=True
+                    )
+
+            conversation.add_assistant_message(normalized_response)
+            committed = True
         finally:
-            await tts_queue.put(None)
-            await worker_task
-
-        conversation.add_assistant_message(full_response)
+            if not committed:
+                conversation.rollback_last_user_message()

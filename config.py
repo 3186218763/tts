@@ -8,6 +8,9 @@ class LLMConfig:
     api_key: str
     base_url: str
     model: str
+    temperature: float = 0.8
+    max_tokens: int = 400
+    frequency_penalty: float = 0.15
 
 
 @dataclass
@@ -23,6 +26,7 @@ class TTSConfig:
     repetition_penalty: float = 1.35
     speed_factor: float = 1.0
     seed: int = 42
+    text_split_method: str = "cut5"
 
 
 @dataclass
@@ -39,8 +43,12 @@ class ASRConfig:
 class AppConfig:
     llm: LLMConfig
     tts: TTSConfig
-    max_turns: int = 10
-    max_sentence_chars: int = 25
+    max_turns: int = 8
+    summary_trigger_turns: int = 12
+    summary_trigger_chars: int = 12_000
+    summary_max_chars: int = 1_800
+    min_sentence_chars: int = 4
+    max_sentence_chars: int = 50
     asr: ASRConfig = field(default_factory=ASRConfig)
 
 
@@ -53,10 +61,18 @@ def load_config(path: str = "configs/config.yaml") -> AppConfig:
         )
     with open(config_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
+    conversation = data.get("conversation", {})
+    streaming = data.get("streaming", {})
     return AppConfig(
         llm=LLMConfig(**data["llm"]),
         tts=TTSConfig(**data["tts"]),
         asr=ASRConfig(**data.get("asr", {})),
-        max_turns=data.get("conversation", {}).get("max_turns", 10),
-        max_sentence_chars=data.get("streaming", {}).get("max_sentence_chars", 25),
+        max_turns=conversation.get(
+            "recent_turns", conversation.get("max_turns", 8)
+        ),
+        summary_trigger_turns=conversation.get("summary_trigger_turns", 12),
+        summary_trigger_chars=conversation.get("summary_trigger_chars", 12_000),
+        summary_max_chars=conversation.get("summary_max_chars", 1_800),
+        min_sentence_chars=streaming.get("min_sentence_chars", 4),
+        max_sentence_chars=streaming.get("max_sentence_chars", 50),
     )

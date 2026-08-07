@@ -97,3 +97,79 @@ async def test_stream_chat_does_not_retry_after_partial_response():
         _ = [t async for t in client.stream_chat([])]
 
     assert calls == 1
+
+
+@pytest.mark.asyncio
+async def test_stream_chat_sends_natural_conversation_parameters():
+    captured = {}
+
+    async def mock_create(**kwargs):
+        captured.update(kwargs)
+
+        async def _stream():
+            yield _mock_chunk("自然回复")
+
+        return _stream()
+
+    mock_openai = AsyncMock()
+    mock_openai.chat.completions.create = mock_create
+    client = LLMClient(
+        "fake",
+        "fake",
+        "test",
+        client=mock_openai,
+        temperature=0.75,
+        max_tokens=320,
+        frequency_penalty=0.2,
+    )
+
+    _ = [token async for token in client.stream_chat([])]
+
+    assert captured["temperature"] == 0.75
+    assert captured["max_tokens"] == 320
+    assert captured["frequency_penalty"] == 0.2
+
+
+@pytest.mark.asyncio
+async def test_summarize_chat_merges_previous_memory_and_archived_turns():
+    captured = {}
+    response = MagicMock()
+    response.choices = [MagicMock()]
+    response.choices[0].message.content = " 用户叫小明，喜欢爵士乐。 "
+
+    async def mock_create(**kwargs):
+        captured.update(kwargs)
+        return response
+
+    mock_openai = AsyncMock()
+    mock_openai.chat.completions.create = mock_create
+    client = LLMClient("fake", "fake", "test", client=mock_openai)
+
+    summary = await client.summarize_chat(
+        previous_summary="用户住在上海。",
+        messages=[
+            {"role": "user", "content": "我叫小明，喜欢爵士乐"},
+            {"role": "assistant", "content": "记住啦"},
+        ],
+        max_chars=100,
+    )
+
+    assert summary == "用户叫小明，喜欢爵士乐。"
+    assert captured["stream"] is False
+    assert captured["temperature"] == 0.2
+    assert "用户住在上海" in captured["messages"][1]["content"]
+    assert "我叫小明" in captured["messages"][1]["content"]
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"temperature": 0},
+        {"max_tokens": 0},
+        {"frequency_penalty": 3},
+        {"max_retries": -1},
+    ],
+)
+def test_rejects_invalid_generation_settings(kwargs):
+    with pytest.raises(ValueError):
+        LLMClient("fake", "fake", "test", client=AsyncMock(), **kwargs)

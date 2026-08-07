@@ -1,10 +1,12 @@
+import asyncio
 import base64
 
+import httpx
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 from dialogue.conversation import Conversation
-from frontend.web import WebChatService, parse_chat_request, sse_event
+from frontend.web import WebChatService, create_app, parse_chat_request, sse_event
 
 
 def _async_iter(tokens):
@@ -71,10 +73,9 @@ async def test_web_tts_failure_emits_error_but_completes_text_stream():
     assert [event["type"] for event in events] == [
         "sentence",
         "audio_error",
-        "sentence",
-        "audio",
         "done",
     ]
+    assert events[0]["text"] == "回复。继续。"
     assert conversation.get_messages()[-1] == {
         "role": "assistant",
         "content": "回复。继续。",
@@ -95,6 +96,30 @@ async def test_web_empty_llm_response_emits_error_and_rolls_back():
 
     assert events == [{"type": "error", "message": "LLM returned an empty response"}]
     assert conversation.get_messages() == []
+
+
+@pytest.mark.asyncio
+async def test_web_filters_stage_directions_before_text_and_audio():
+    llm = AsyncMock()
+    llm.stream_chat = MagicMock(
+        return_value=_async_iter(["（心里想着：好紧张。）", "见到你真开心！💕"])
+    )
+    tts = AsyncMock()
+    tts.synthesize = AsyncMock(return_value=b"wav")
+    conversation = Conversation()
+
+    events = [
+        event
+        async for event in WebChatService(llm, tts).stream("你好", conversation)
+    ]
+
+    assert [event["type"] for event in events] == ["sentence", "audio", "done"]
+    assert events[0]["text"] == "见到你真开心！"
+    tts.synthesize.assert_awaited_once_with("见到你真开心！")
+    assert conversation.get_messages()[-1] == {
+        "role": "assistant",
+        "content": "见到你真开心！",
+    }
 
 
 def test_parse_chat_request_rejects_empty_or_oversized_messages():
@@ -179,3 +204,181 @@ def test_create_app_serves_ui_health_and_streaming_chat():
         },
     )
     assert oversized.status_code == 413
+
+
+@pytest.mark.asyncio
+async def test_same_session_chat_requests_are_serialized():
+    class BlockingService:
+        def __init__(self):
+            self.active = 0
+            self.max_active = 0
+            self.entered: list[str] = []
+            self.first_entered = asyncio.Event()
+            self.release_first = asyncio.Event()
+            self.conversation = None
+
+        async def stream(self, message, conversation):
+            self.active += 1
+            self.max_active = max(self.max_active, self.active)
+            self.entered.append(message)
+            self.conversation = conversation
+            conversation.add_user_message(message)
+            try:
+                if message == "first":
+                    self.first_entered.set()
+                    await self.release_first.wait()
+                conversation.add_assistant_message(f"reply-{message}")
+                yield {"type": "done"}
+            finally:
+                self.active -= 1
+
+    service = BlockingService()
+    transport = httpx.ASGITransport(app=create_app(service))
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://testserver"
+    ) as client:
+        first = asyncio.create_task(
+            client.post(
+                "/api/chat",
+                json={"message": "first", "session_id": "shared"},
+            )
+        )
+        await asyncio.wait_for(service.first_entered.wait(), timeout=1)
+        second = asyncio.create_task(
+            client.post(
+                "/api/chat",
+                json={"message": "second", "session_id": "shared"},
+            )
+        )
+        await asyncio.sleep(0.05)
+
+        assert service.entered == ["first"]
+        service.release_first.set()
+        responses = await asyncio.gather(first, second)
+
+    assert [response.status_code for response in responses] == [200, 200]
+    assert service.max_active == 1
+    assert service.entered == ["first", "second"]
+    assert service.conversation.get_messages() == [
+        {"role": "user", "content": "first"},
+        {"role": "assistant", "content": "reply-first"},
+        {"role": "user", "content": "second"},
+        {"role": "assistant", "content": "reply-second"},
+    ]
+
+
+@pytest.mark.asyncio
+async def test_reset_waits_for_an_active_chat_in_the_same_session():
+    class BlockingService:
+        def __init__(self):
+            self.entered = asyncio.Event()
+            self.release = asyncio.Event()
+            self.conversation = None
+
+        async def stream(self, message, conversation):
+            self.conversation = conversation
+            conversation.add_user_message(message)
+            self.entered.set()
+            await self.release.wait()
+            conversation.add_assistant_message("reply")
+            yield {"type": "done"}
+
+    service = BlockingService()
+    transport = httpx.ASGITransport(app=create_app(service))
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://testserver"
+    ) as client:
+        chat = asyncio.create_task(
+            client.post(
+                "/api/chat",
+                json={"message": "hello", "session_id": "shared"},
+            )
+        )
+        await asyncio.wait_for(service.entered.wait(), timeout=1)
+        reset = asyncio.create_task(
+            client.post("/api/reset", json={"session_id": "shared"})
+        )
+        await asyncio.sleep(0.05)
+
+        assert not reset.done()
+        service.release.set()
+        chat_response, reset_response = await asyncio.gather(chat, reset)
+
+    assert chat_response.status_code == 200
+    assert reset_response.status_code == 200
+    assert service.conversation.get_messages() == []
+
+
+@pytest.mark.asyncio
+async def test_session_limit_does_not_evict_an_active_conversation():
+    class EvictionProbeService:
+        def __init__(self):
+            self.first_started = asyncio.Event()
+            self.followup_started = asyncio.Event()
+            self.release_first = asyncio.Event()
+            self.conversations = {}
+
+        async def stream(self, message, conversation):
+            self.conversations[message] = conversation
+            if message == "first":
+                self.first_started.set()
+                await self.release_first.wait()
+            elif message == "followup":
+                self.followup_started.set()
+            yield {"type": "done"}
+
+    service = EvictionProbeService()
+    transport = httpx.ASGITransport(app=create_app(service, max_sessions=1))
+    async with httpx.AsyncClient(
+        transport=transport, base_url="http://testserver"
+    ) as client:
+        first = asyncio.create_task(
+            client.post(
+                "/api/chat",
+                json={"message": "first", "session_id": "protected"},
+            )
+        )
+        await asyncio.wait_for(service.first_started.wait(), timeout=1)
+
+        other = await client.post(
+            "/api/chat",
+            json={"message": "other", "session_id": "other"},
+        )
+        assert other.status_code == 200
+
+        followup = asyncio.create_task(
+            client.post(
+                "/api/chat",
+                json={"message": "followup", "session_id": "protected"},
+            )
+        )
+        try:
+            with pytest.raises(asyncio.TimeoutError):
+                await asyncio.wait_for(
+                    service.followup_started.wait(), timeout=0.05
+                )
+        finally:
+            service.release_first.set()
+            first_response, followup_response = await asyncio.gather(
+                first, followup
+            )
+
+    assert first_response.status_code == 200
+    assert followup_response.status_code == 200
+    assert service.conversations["first"] is service.conversations["followup"]
+
+
+@pytest.mark.asyncio
+async def test_closing_web_stream_mid_response_rolls_back_pending_user():
+    llm = AsyncMock()
+    llm.stream_chat = MagicMock(
+        return_value=_async_iter(["第一句话。", "第二句话。"])
+    )
+    tts = AsyncMock()
+    conversation = Conversation()
+
+    stream = WebChatService(llm, tts).stream("问题", conversation)
+    assert await anext(stream) == {"type": "sentence", "text": "第一句话。"}
+    await stream.aclose()
+
+    assert conversation.get_messages() == []

@@ -18,3 +18,9 @@ def test_instructs_not_to_break_character():
 
 def test_mentions_japanese_capability():
     assert "日" in get_system_prompt()
+
+
+def test_requires_spoken_dialogue_only():
+    prompt = get_system_prompt()
+    assert "只输出" in prompt
+    assert "心理活动" in prompt

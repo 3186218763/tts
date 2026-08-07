@@ -44,7 +44,7 @@ async def test_synthesize_sends_correct_body():
     assert body["ref_audio_path"] == "/ref.wav"
     assert body["prompt_text"] == "参考文本"
     assert body["prompt_lang"] == "zh"
-    assert body["text_split_method"] == "cut0"
+    assert body["text_split_method"] == "cut5"
     assert body["top_k"] == 15
     assert body["top_p"] == 1.0
     assert body["temperature"] == 0.85
@@ -57,14 +57,58 @@ async def test_synthesize_sends_correct_body():
 
 @pytest.mark.asyncio
 @respx.mock
-async def test_synthesize_default_language_is_auto():
+async def test_synthesize_normalizes_stage_directions_at_api_boundary():
+    route = respx.post("http://127.0.0.1:9880/tts").mock(
+        return_value=httpx.Response(200, content=b"audio")
+    )
+    client = TTSClient("http://127.0.0.1:9880", "/r.wav", "ref", "zh")
+
+    await client.synthesize("（脸红）你好呀！💕")
+
+    body = json.loads(route.calls[0].request.content)
+    assert body["text"] == "你好呀！"
+
+
+@pytest.mark.asyncio
+async def test_synthesize_rejects_action_only_text():
+    client = TTSClient("http://127.0.0.1:9880", "/r.wav", "ref", "zh")
+
+    with pytest.raises(ValueError, match="no speakable content"):
+        await client.synthesize("（轻轻点头）💕")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_synthesize_auto_language_routes_unambiguous_english():
     route = respx.post("http://localhost:9880/tts").mock(
         return_value=httpx.Response(200, content=b"audio")
     )
     client = TTSClient("http://localhost:9880", "/r.wav", "ref", "zh")
     await client.synthesize("test")
     body = json.loads(route.calls[0].request.content)
-    assert body["text_lang"] == "auto"
+    assert body["text_lang"] == "en"
+
+
+@pytest.mark.asyncio
+@respx.mock
+@pytest.mark.parametrize(
+    ("text", "expected_language"),
+    [
+        ("今天也要加油。", "zh"),
+        ("今日も頑張ろうね。", "ja"),
+        ("今天一起 play 游戏。", "auto"),
+    ],
+)
+async def test_synthesize_auto_language_routes_by_script(text, expected_language):
+    route = respx.post("http://localhost:9880/tts").mock(
+        return_value=httpx.Response(200, content=b"audio")
+    )
+    client = TTSClient("http://localhost:9880", "/r.wav", "ref", "zh")
+
+    await client.synthesize(text)
+
+    body = json.loads(route.calls[0].request.content)
+    assert body["text_lang"] == expected_language
 
 
 @pytest.mark.asyncio
@@ -90,3 +134,14 @@ async def test_check_available_raises_clear_error_when_api_is_down():
 
     with pytest.raises(RuntimeError, match="TTS 服务未运行"):
         await client.check_available()
+
+
+def test_rejects_unknown_text_split_method():
+    with pytest.raises(ValueError, match="text_split_method"):
+        TTSClient(
+            "http://127.0.0.1:9880",
+            "/r.wav",
+            "ref",
+            "zh",
+            text_split_method="unknown",
+        )

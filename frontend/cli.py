@@ -21,6 +21,9 @@ async def main() -> None:
         api_key=config.llm.api_key,
         base_url=config.llm.base_url,
         model=config.llm.model,
+        temperature=config.llm.temperature,
+        max_tokens=config.llm.max_tokens,
+        frequency_penalty=config.llm.frequency_penalty,
     )
     tts = TTSClient(
         base_url=config.tts.base_url,
@@ -34,6 +37,7 @@ async def main() -> None:
         repetition_penalty=config.tts.repetition_penalty,
         speed_factor=config.tts.speed_factor,
         seed=config.tts.seed,
+        text_split_method=config.tts.text_split_method,
     )
     try:
         await tts.check_available()
@@ -41,8 +45,19 @@ async def main() -> None:
         print(f"❌ {exc}", file=sys.stderr)
         return
     player = AudioPlayer()
-    orchestrator = Orchestrator(llm, tts, player, max_chars=config.max_sentence_chars)
-    conversation = Conversation(max_turns=config.max_turns)
+    orchestrator = Orchestrator(
+        llm,
+        tts,
+        player,
+        max_chars=config.max_sentence_chars,
+        min_chars=config.min_sentence_chars,
+    )
+    conversation = Conversation(
+        recent_turns=config.max_turns,
+        summary_trigger_turns=config.summary_trigger_turns,
+        summary_trigger_chars=config.summary_trigger_chars,
+        summary_max_chars=config.summary_max_chars,
+    )
 
     print("=" * 52)
     print("       🌸 AI 花音 — 对话模式 (Ctrl+C 退出)")
