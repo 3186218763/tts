@@ -117,3 +117,49 @@ def test_persona_card_honesty_and_chinese_first():
     assert "AI 复刻" in prompt
     assert "中文为主" in prompt
     assert "不制作其周边" in prompt
+
+
+def test_asr_pool_quality_gate_reconnect():
+    """池内条目回连 asr_results.json 验证 high_conf；未入选抽样必须被剔除。
+
+    依赖数据快照 data/asr_results.json：若重新跑 ASR 管线，需同步重新生成
+    fewshot-lines.json 后再跑本测试。
+    """
+    from scripts.dataset_text_quality import evaluate_text_quality
+
+    pool = json.loads(
+        (ROOT / "docs/persona/fewshot-lines.json").read_text(encoding="utf-8")
+    )["asr_pool"]
+    asr = json.loads(
+        (ROOT / "data/asr_results.json").read_text(encoding="utf-8")
+    )
+    by_path = {record["path"].rsplit("/", 1)[-1]: record for record in asr}
+    pool_texts = {item["text"] for item in pool}
+
+    for item in pool:
+        record = by_path.get(item["source"])
+        assert record is not None, item["source"]
+        assert record["avg_logprob"] >= -0.2
+        assert record["language_probability"] >= 0.9
+        assert record.get("segment_count") in (1, None)
+        assert evaluate_text_quality(item["text"], item["lang"]).keep
+
+    rng = random.Random(0)
+    candidates = [r for r in asr if r.get("avg_logprob") is not None]
+    sample = rng.sample(candidates, min(100, len(candidates)))
+    leaked = 0
+    for record in sample:
+        text = (record.get("text") or "").strip()
+        if text in pool_texts:
+            continue
+        meets_high_conf = (
+            record.get("segment_count") in (1, None)
+            and record["avg_logprob"] >= -0.2
+            and (record.get("language_probability") or 0) >= 0.9
+            and (record.get("max_no_speech_probability") or 0) <= 0.3
+            and (record.get("max_compression_ratio") or 0) <= 1.2
+            and evaluate_text_quality(text, record.get("lang")).keep
+        )
+        if meets_high_conf:
+            leaked += 1
+    assert leaked == 0
