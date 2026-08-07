@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .conversation import Conversation
 from .persona import get_system_prompt
+from .persona_context import build_persona_context
 
 
 async def compact_conversation(llm_client, conversation: Conversation) -> bool:
@@ -27,11 +28,20 @@ async def compact_conversation(llm_client, conversation: Conversation) -> bool:
     return conversation.apply_compaction(plan, summary)
 
 
+def _last_user_text(conversation: Conversation) -> str | None:
+    """回扫取最后一条 role=user 消息（容忍尾消息为 assistant 的补答/重试场景）；空会话返回 None。"""
+    for message in reversed(conversation.get_messages()):
+        if message["role"] == "user":
+            return message["content"]
+    return None
+
+
 async def prepare_chat_messages(
     llm_client, conversation: Conversation
 ) -> list[dict[str, str]]:
     """Compact if needed, then build the ordered model context."""
     await compact_conversation(llm_client, conversation)
     messages = [{"role": "system", "content": get_system_prompt()}]
+    messages.extend(build_persona_context(_last_user_text(conversation)))
     messages.extend(conversation.get_context_messages())
     return messages
