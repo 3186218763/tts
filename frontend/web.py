@@ -8,7 +8,7 @@ import base64
 import json
 import re
 from collections.abc import AsyncIterator, Mapping
-from contextlib import suppress
+from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -172,6 +172,7 @@ def _default_service(config: AppConfig | None = None) -> WebChatService:
             api_key=config.llm.api_key,
             base_url=config.llm.base_url,
             model=config.llm.model,
+            protocol=config.llm.protocol,
             temperature=config.llm.temperature,
             max_tokens=config.llm.max_tokens,
             frequency_penalty=config.llm.frequency_penalty,
@@ -238,7 +239,16 @@ def create_app(
             1, int(runtime_config.asr.max_upload_mb * 1024 * 1024)
         )
         default_asr_language = runtime_config.asr.language
-    app = FastAPI(title="AI 花音", version="0.1.0")
+    @asynccontextmanager
+    async def lifespan(app):
+        """应用关闭时释放内部创建的 LLM 客户端连接池(热重载/退出不泄漏)。"""
+        yield
+        llm = getattr(chat_service, "_llm", None)
+        close = getattr(llm, "aclose", None)
+        if callable(close):
+            await close()
+
+    app = FastAPI(title="AI 花音", version="0.1.0", lifespan=lifespan)
     if WEB_ASSETS_DIR.is_dir():
         app.mount("/assets", StaticFiles(directory=WEB_ASSETS_DIR), name="assets")
     sessions: dict[str, _SessionState] = {}

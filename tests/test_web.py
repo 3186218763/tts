@@ -418,3 +418,61 @@ def test_frontend_src_references_api_paths():
     )
     for endpoint in ("/api/chat", "/api/transcribe", "/api/reset", "/healthz"):
         assert endpoint in sources, f"前端源码未引用 {endpoint}"
+
+
+def _config_yaml(protocol: str = "anthropic") -> str:
+    return f"""
+llm:
+  api_key: key
+  base_url: https://example.test
+  model: model
+  protocol: {protocol}
+tts:
+  base_url: http://localhost:9880
+  ref_audio_path: /ref.wav
+  ref_text: ref
+  ref_language: zh
+"""
+
+
+@pytest.mark.asyncio
+async def test_default_service_passes_llm_protocol_from_config(tmp_path):
+    from config import load_config
+    from dialogue.llm_client import LLMClient
+    from frontend.web import _default_service
+
+    path = tmp_path / "config.yaml"
+    path.write_text(_config_yaml(), encoding="utf-8")
+
+    service = _default_service(load_config(str(path)))
+
+    assert isinstance(service._llm, LLMClient)
+    assert service._llm._protocol == "anthropic"
+    assert isinstance(service._llm._client, httpx.AsyncClient)
+    await service._llm.aclose()
+
+
+def test_cli_passes_llm_protocol_from_config():
+    cli_path = Path(__file__).resolve().parents[1] / "frontend" / "cli.py"
+    source = cli_path.read_text(encoding="utf-8")
+    assert "protocol=config.llm.protocol" in source
+
+
+def test_create_app_lifespan_closes_llm_client(tmp_path):
+    fastapi = pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    from config import load_config
+    from frontend.web import _default_service, create_app
+
+    path = tmp_path / "config.yaml"
+    path.write_text(_config_yaml(), encoding="utf-8")
+    service = _default_service(load_config(str(path)))
+    client = service._llm._client
+    assert isinstance(client, httpx.AsyncClient)
+    assert client.is_closed is False
+
+    with TestClient(create_app(service)) as test_client:
+        assert test_client.get("/healthz").status_code == 200
+
+    assert client.is_closed is True

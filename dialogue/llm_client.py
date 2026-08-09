@@ -1,5 +1,6 @@
-"""DeepSeek（OpenAI 兼容）LLM 流式客户端。"""
+"""DeepSeek LLM 流式客户端:OpenAI 兼容与 Anthropic 原生双协议。"""
 
+import inspect
 import json
 from collections.abc import AsyncIterator
 
@@ -26,7 +27,9 @@ def _messages_url(base_url: str) -> str:
 
 def _split_system(messages: list[dict]) -> tuple[str | None, list[dict]]:
     """把 system 消息合并为 Anthropic 顶层 system 参数,messages 中不残留。"""
-    system = "\n\n".join(m["content"] for m in messages if m.get("role") == "system")
+    system = "\n\n".join(
+        m.get("content", "") for m in messages if m.get("role") == "system"
+    )
     rest = [m for m in messages if m.get("role") != "system"]
     return (system or None), rest
 
@@ -48,7 +51,7 @@ class LLMClient:
     ):
         if protocol not in ("openai", "anthropic"):
             raise ValueError(
-                f"protocol must be 'openai' or 'anthropic', got {protocol!r}"
+                f"protocol 必须是 openai 或 anthropic，当前为 {protocol!r}"
             )
         if max_retries < 0:
             raise ValueError("max_retries must not be negative")
@@ -71,6 +74,18 @@ class LLMClient:
         self._temperature = temperature
         self._max_tokens = max_tokens
         self._frequency_penalty = frequency_penalty
+
+    async def aclose(self) -> None:
+        """关闭底层 HTTP 客户端连接池(应用退出或热重载时调用)。"""
+        if self._protocol == "anthropic":
+            closer = self._client.aclose
+        else:
+            closer = getattr(self._client, "close", None)
+        if closer is None:
+            return
+        result = closer()
+        if inspect.isawaitable(result):
+            await result
 
     async def stream_chat(self, messages: list[dict]) -> AsyncIterator[str]:
         """流式生成回复，逐个 token 产出（None/空字符串自动跳过）。"""
@@ -128,7 +143,25 @@ class LLMClient:
                 async for line in response.aiter_lines():
                     if not line.startswith("data:"):
                         continue
-                    event = json.loads(line[5:].strip())
+                    raw = line[5:].strip()
+                    if not raw:
+                        continue
+                    try:
+                        event = json.loads(raw)
+                    except json.JSONDecodeError:
+                        # [DONE] 与裸 data: 保活行不是 JSON,跳过
+                        continue
+                    if event.get("type") == "error":
+                        error = event.get("error") or {}
+                        detail = (
+                            error.get("message")
+                            if isinstance(error, dict)
+                            else None
+                        )
+                        raise RuntimeError(
+                            "Anthropic API error: "
+                            f"{detail or json.dumps(event, ensure_ascii=False)}"
+                        )
                     if event.get("type") == "message_stop":
                         break
                     delta = event.get("delta", {})
@@ -206,6 +239,9 @@ class LLMClient:
                 if not summary:
                     raise RuntimeError("LLM returned an empty conversation summary")
                 return summary[:max_chars]
+            except RuntimeError:
+                # 空摘要是确定性失败,重试只会重复相同请求
+                raise
             except Exception:
                 if attempts >= self._max_retries:
                     raise
@@ -262,6 +298,9 @@ class LLMClient:
                 if not summary:
                     raise RuntimeError("LLM returned an empty conversation summary")
                 return summary[:max_chars]
+            except RuntimeError:
+                # 空摘要是确定性失败,重试只会重复相同请求
+                raise
             except Exception:
                 if attempts >= self._max_retries:
                     raise

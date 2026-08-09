@@ -50,8 +50,8 @@ llm:
     2023-06-01` / `content-type: application/json`。
   - body:`model` / `max_tokens` / `temperature` / `stream: true` / `messages`(过滤掉
     system 后) / `system`(如有)。
-  - 逐行解析 SSE 事件:`content_block_delta` 事件中 `delta.type == "text"` 时产出
-    `delta.text`;**`delta.type == "thinking"` 跳过**;`message_stop` 结束。
+  - 逐行解析 SSE 事件:`content_block_delta` 事件中 `delta.type == "text_delta"` 时
+    产出 `delta.text`;**`delta.type == "thinking_delta"` 跳过**;`message_stop` 结束。
   - 重试语义不变:首 token 前失败可重试(`max_retries`),已产出则不重试。
   - `frequency_penalty` 在 anthropic 协议下忽略(不发送该字段)。
 - `summarize_chat(...)`(签名不变):
@@ -89,4 +89,5 @@ llm:
 - 不删除 OpenAI 兼容路径,不做协议自动探测/回退。
 - 不引入 anthropic 官方 SDK。
 - 不支持 Anthropic 的 tools/缓存控制等特性,按当前接口最小实现。
-- 不改动 orchestrator / memory / conversation 等上游模块。
+- 不改动 orchestrator / memory / conversation 等上游模块;cli/web 前端的
+  LLMClient 构造点接线(把配置的 `protocol` 透传给构造参数)属于本任务范围。

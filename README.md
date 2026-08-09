@@ -62,7 +62,7 @@ python scripts/test_huayin_tts.py "你好，今天也要加油。"
 ├── config.py                    # 类型化配置加载（YAML → dataclass）
 ├── configs/config.example.yaml  # 配置模板（实际配置 config.yaml 被 gitignore）
 ├── dialogue/                    # 对话核心
-│   ├── llm_client.py            # DeepSeek（OpenAI 兼容）流式客户端 + 摘要接口
+│   ├── llm_client.py            # OpenAI 兼容 / Anthropic 原生双协议流式客户端 + 摘要接口
 │   ├── tts_client.py            # GPT-SoVITS TTS API 客户端（统一接口，可换引擎）
 │   ├── asr_client.py            # 本地 faster-whisper 转写（懒加载）
 │   ├── conversation.py          # 对话历史：近期原文 + 滚动摘要 + 原子压缩
@@ -81,14 +81,14 @@ python scripts/test_huayin_tts.py "你好，今天也要加油。"
 ├── scripts/                     # 数据管线 / 训练 / 运维脚本（见下表）
 ├── data/                        # 数据管线各阶段产物（见下）
 ├── model/                       # 训练好的模型权重（Git LFS）
-└── tests/                       # pytest 测试（121 个，全部 mock，不依赖外部服务）
+└── tests/                       # pytest 测试（198 个，全部 mock，不依赖外部服务）
 ```
 
 ## 配置说明
 
 | 配置节 | 关键项 | 说明 |
 |--------|--------|------|
-| `llm` | `api_key` / `base_url` / `model` | DeepSeek 兼容接口；`temperature 0.8`、`max_tokens 400`、`frequency_penalty 0.15` 适合口语对话 |
+| `llm` | `api_key` / `base_url` / `model` / `protocol` | DeepSeek 兼容接口；`protocol` 支持 `openai`（默认）与 `anthropic` 原生协议；`temperature 0.8`、`max_tokens 400`、`frequency_penalty 0.15` 适合口语对话 |
 | `tts` | `base_url` / `ref_audio_path` / `ref_text` | GPT-SoVITS 地址与参考音频；采样参数为可复现的保守默认（固定 `seed 42`） |
 | `asr` | `model` / `device` / `compute_type` | 浏览器录音转写，默认 `small`，首次使用会下载模型 |
 | `conversation` | `recent_turns` / `summary_trigger_turns` / `summary_trigger_chars` / `summary_max_chars` | 记忆分层阈值；旧配置 `max_turns` 仍作为 `recent_turns` 别名 |
@@ -185,7 +185,7 @@ python scripts/train_gpt_sovits.py \
 python -m pytest -q
 ```
 
-121 个测试覆盖对话核心、切句、记忆压缩、流水线、Web SSE、配置加载与数据管线逻辑，
+198 个测试覆盖对话核心、切句、记忆压缩、流水线、Web SSE、配置加载与数据管线逻辑，
 全部 mock 化，不依赖外部 API 或 GPU。
 
 ## 外部依赖说明
