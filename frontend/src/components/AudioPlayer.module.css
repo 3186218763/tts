@@ -1,0 +1,18 @@
+.player {
+  margin-top: 8px; height: 26px; width: 168px; border-radius: 8px;
+  display: flex; align-items: center; gap: 6px; padding: 0 10px;
+  background: rgba(242, 182, 160, 0.09); border: 1px solid rgba(242, 182, 160, 0.28);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.player:hover { border-color: rgba(242, 182, 160, 0.5); }
+.playBtn {
+  width: 14px; height: 14px; border-radius: 50%; flex: 0 0 14px; display: grid; place-items: center;
+  background: var(--accent-gradient); color: #241310; font-size: 7px; font-weight: 700;
+  box-shadow: 0 0 6px rgba(255, 145, 125, 0.6);
+}
+.playBtn::before { content: "▶"; }
+.playBtn.pause::before { content: "❚❚"; }
+.bars { flex: 1; display: flex; align-items: center; gap: 2.5px; height: 14px; }
+.bar { flex: 1; border-radius: 2px; background: linear-gradient(180deg, #ffd9c7, #f2a98c); opacity: 0.85; }
+.time { font-size: 10px; color: #e0b9a6; letter-spacing: 0.03em; }
+.error { margin-top: 8px; font-size: 11px; color: #d9a09a; }
