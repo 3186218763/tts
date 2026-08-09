@@ -194,3 +194,95 @@ def test_anthropic_protocol_uses_injected_http_client():
         client=http, protocol="anthropic",
     )
     assert client._client is http
+
+
+def _mock_http(response=None):
+    http = MagicMock()
+    http.post = AsyncMock(return_value=response)
+    return http
+
+
+def _summary_response(*blocks):
+    response = MagicMock()
+    response.status_code = 200
+    response.json.return_value = {"content": list(blocks)}
+    return response
+
+
+@pytest.mark.asyncio
+async def test_anthropic_summarize_merges_system_and_extracts_text():
+    captured = {}
+
+    async def _post(url, **kwargs):
+        captured["url"] = url
+        captured["headers"] = kwargs["headers"]
+        captured["json"] = kwargs["json"]
+        return _summary_response(
+            {"type": "thinking", "thinking": "内部推理"},
+            {"type": "text", "text": " 用户叫小明。 "},
+        )
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient(
+        "fake-key", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    summary = await client.summarize_chat(
+        previous_summary="",
+        messages=[
+            {"role": "system", "content": "人设"},
+            {"role": "user", "content": "我叫小明"},
+        ],
+        max_chars=100,
+    )
+
+    assert summary == "用户叫小明。"
+    assert captured["url"] == "https://opencode.ai/zen/go/v1/messages"
+    assert captured["headers"]["x-api-key"] == "fake-key"
+    assert captured["headers"]["anthropic-version"] == "2023-06-01"
+    body = captured["json"]
+    # 摘要路径的 system 固定为 SUMMARY_SYSTEM_PROMPT,归档对话拼进 user prompt
+    assert body["system"] == SUMMARY_SYSTEM_PROMPT
+    assert "我叫小明" in body["messages"][0]["content"]
+    assert body["stream"] is False
+    assert body["temperature"] == 0.2
+    assert "frequency_penalty" not in body
+
+
+@pytest.mark.asyncio
+async def test_anthropic_summarize_raises_on_empty_text():
+    http = _mock_http(_summary_response({"type": "thinking", "thinking": "无"}))
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    with pytest.raises(RuntimeError, match="empty"):
+        await client.summarize_chat(
+            previous_summary="", messages=[{"role": "user", "content": "hi"}],
+            max_chars=100,
+        )
+
+
+@pytest.mark.asyncio
+async def test_anthropic_base_url_with_v1_suffix_not_doubled():
+    captured = {}
+
+    async def _post(url, **kwargs):
+        captured["url"] = url
+        return _summary_response({"type": "text", "text": "ok"})
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go/v1", "test",
+        client=http, protocol="anthropic",
+    )
+    await client.summarize_chat(
+        previous_summary="", messages=[{"role": "user", "content": "hi"}],
+        max_chars=100,
+    )
+    assert captured["url"] == "https://opencode.ai/zen/go/v1/messages"
