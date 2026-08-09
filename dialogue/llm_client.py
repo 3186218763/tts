@@ -74,6 +74,10 @@ class LLMClient:
 
     async def stream_chat(self, messages: list[dict]) -> AsyncIterator[str]:
         """流式生成回复，逐个 token 产出（None/空字符串自动跳过）。"""
+        if self._protocol == "anthropic":
+            async for token in self._stream_anthropic(messages):
+                yield token
+            return
         # A stream cannot be safely replayed after yielding a token because the
         # retry would duplicate already displayed text. Retry only failures that
         # happen before the first token is delivered.
@@ -94,6 +98,45 @@ class LLMClient:
                     if token:
                         emitted = True
                         yield token
+                return
+            except Exception:
+                if emitted or attempts >= self._max_retries:
+                    raise
+                attempts += 1
+
+    async def _stream_anthropic(self, messages: list[dict]) -> AsyncIterator[str]:
+        system, rest = _split_system(messages)
+        body: dict = {
+            "model": self._model,
+            "max_tokens": self._max_tokens,
+            "temperature": self._temperature,
+            "stream": True,
+            "messages": rest,
+        }
+        if system:
+            body["system"] = system
+        attempts = 0
+        while True:
+            emitted = False
+            try:
+                response = await self._client.post(
+                    _messages_url(self._base_url),
+                    headers=self._anthropic_headers(),
+                    json=body,
+                )
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    if not line.startswith("data:"):
+                        continue
+                    event = json.loads(line[5:].strip())
+                    if event.get("type") == "message_stop":
+                        break
+                    delta = event.get("delta", {})
+                    if delta.get("type") == "text":
+                        text = delta.get("text")
+                        if text:
+                            emitted = True
+                            yield text
                 return
             except Exception:
                 if emitted or attempts >= self._max_retries:

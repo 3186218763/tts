@@ -286,3 +286,134 @@ async def test_anthropic_base_url_with_v1_suffix_not_doubled():
         max_chars=100,
     )
     assert captured["url"] == "https://opencode.ai/zen/go/v1/messages"
+
+
+async def _aiter_lines(events):
+    for event in events:
+        yield f"data: {json.dumps(event)}"
+
+
+def _stream_response(events):
+    response = MagicMock()
+    response.status_code = 200
+    response.aiter_lines = lambda: _aiter_lines(events)
+    return response
+
+
+def _text_delta(text):
+    return {"type": "content_block_delta", "delta": {"type": "text", "text": text}}
+
+
+def _thinking_delta(text):
+    return {"type": "content_block_delta", "delta": {"type": "thinking", "thinking": text}}
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_yields_text_and_skips_thinking():
+    events = [
+        {"type": "message_start", "message": {"id": "m1"}},
+        {"type": "content_block_start", "index": 0, "content_block": {"type": "thinking", "thinking": ""}},
+        _thinking_delta("内部推理"),
+        {"type": "content_block_stop", "index": 0},
+        {"type": "content_block_start", "index": 1, "content_block": {"type": "text", "text": ""}},
+        _text_delta("你好"),
+        _text_delta("呀"),
+        {"type": "content_block_stop", "index": 1},
+        {"type": "message_stop"},
+    ]
+    http = _mock_http(_stream_response(events))
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    tokens = [t async for t in client.stream_chat([{"role": "user", "content": "hi"}])]
+
+    assert tokens == ["你好", "呀"]
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_merges_system_and_omits_frequency_penalty():
+    captured = {}
+    events = [_text_delta("回复")]
+
+    async def _post(url, **kwargs):
+        captured["url"] = url
+        captured["json"] = kwargs["json"]
+        return _stream_response(events)
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+        temperature=0.75, max_tokens=320, frequency_penalty=0.2,
+    )
+    tokens = [t async for t in client.stream_chat(
+        [
+            {"role": "system", "content": "人设"},
+            {"role": "system", "content": "记忆摘要"},
+            {"role": "user", "content": "hi"},
+        ]
+    )]
+
+    assert tokens == ["回复"]
+    body = captured["json"]
+    assert body["system"] == "人设\n\n记忆摘要"
+    assert body["messages"] == [{"role": "user", "content": "hi"}]
+    assert body["temperature"] == 0.75
+    assert body["max_tokens"] == 320
+    assert "frequency_penalty" not in body
+    assert body["stream"] is True
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_retries_initial_failure_once():
+    calls = 0
+    events = [_text_delta("重试成功")]
+
+    async def _post(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise httpx.ConnectError("temporary")
+        return _stream_response(events)
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient("fake", "https://opencode.ai/zen/go", "test", client=http, protocol="anthropic")
+    tokens = [t async for t in client.stream_chat([{"role": "user", "content": "hi"}])]
+
+    assert tokens == ["重试成功"]
+    assert calls == 2
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_does_not_retry_after_partial_response():
+    calls = 0
+    events = [_text_delta("部分")]
+
+    async def _post(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+
+        async def _lines():
+            async for line in _aiter_lines(events):
+                yield line
+            raise RuntimeError("connection lost")
+
+        response = MagicMock()
+        response.status_code = 200
+        response.aiter_lines = _lines
+        return response
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient("fake", "https://opencode.ai/zen/go", "test", client=http, protocol="anthropic")
+    with pytest.raises(RuntimeError, match="connection lost"):
+        _ = [t async for t in client.stream_chat([{"role": "user", "content": "hi"}])]
+
+    assert calls == 1
