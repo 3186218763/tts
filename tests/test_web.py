@@ -1,5 +1,6 @@
 import asyncio
 import base64
+from pathlib import Path
 
 import httpx
 import pytest
@@ -15,6 +16,12 @@ def _async_iter(tokens):
             yield token
 
     return _gen()
+
+
+class FakeService:
+    async def stream(self, message, conversation):
+        yield {"type": "sentence", "text": f"收到：{message}"}
+        yield {"type": "done"}
 
 
 @pytest.mark.asyncio
@@ -142,11 +149,6 @@ def test_create_app_serves_ui_health_and_streaming_chat():
     fastapi = pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
 
-    class FakeService:
-        async def stream(self, message, conversation):
-            yield {"type": "sentence", "text": f"收到：{message}"}
-            yield {"type": "done"}
-
     from frontend.web import create_app
 
     class FakeTranscriber:
@@ -162,11 +164,6 @@ def test_create_app_serves_ui_health_and_streaming_chat():
     assert health.json()["llm_configured"] is False
     assert health.json()["asr_configured"] is True
     assert health.json()["tts_available"] is None
-    page = client.get("/")
-    assert page.status_code == 200
-    assert "AI 花音" in page.text
-    assert 'id="record"' in page.text
-    assert "/api/transcribe" in page.text
 
     response = client.post(
         "/api/chat",
@@ -382,3 +379,42 @@ async def test_closing_web_stream_mid_response_rolls_back_pending_user():
     await stream.aclose()
 
     assert conversation.get_messages() == []
+
+
+def test_index_serves_built_frontend_when_present(tmp_path):
+    fastapi = pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+    from frontend.web import create_app
+
+    page = tmp_path / "index.html"
+    page.write_text('<title>AI 花音</title><div id="root"></div>', encoding="utf-8")
+    client = TestClient(create_app(FakeService(), index_html=page))
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "AI 花音" in response.text
+    assert '<div id="root">' in response.text
+
+
+def test_index_missing_frontend_returns_build_hint():
+    fastapi = pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+    from frontend.web import create_app
+
+    client = TestClient(
+        create_app(FakeService(), index_html=Path("/nonexistent/index.html"))
+    )
+    response = client.get("/")
+    assert response.status_code == 503
+    assert "npm run build" in response.text
+
+
+def test_frontend_src_references_api_paths():
+    src_root = Path(__file__).resolve().parents[1] / "frontend" / "src"
+    if not src_root.is_dir():
+        pytest.skip("frontend/src 尚未创建")
+    sources = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted(src_root.rglob("*.ts")) + sorted(src_root.rglob("*.tsx"))
+    )
+    for endpoint in ("/api/chat", "/api/transcribe", "/api/reset", "/healthz"):
+        assert endpoint in sources, f"前端源码未引用 {endpoint}"

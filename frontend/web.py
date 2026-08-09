@@ -24,7 +24,17 @@ from dialogue.tts_client import TTSClient
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-WEB_HTML = PROJECT_ROOT / "frontend" / "web.html"
+WEB_HTML = PROJECT_ROOT / "frontend" / "dist" / "index.html"
+WEB_ASSETS_DIR = PROJECT_ROOT / "frontend" / "dist" / "assets"
+WEB_HINT_HTML = (
+    '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'
+    "<title>AI 花音</title></head>"
+    '<body style="background:#101416;color:#f1ece7;font:15px system-ui;'
+    'display:grid;place-items:center;min-height:100vh">'
+    "<p>Web 前端未构建，请先运行："
+    "<code>cd frontend &amp;&amp; npm install &amp;&amp; npm run build</code></p>"
+    "</body></html>"
+)
 MAX_MESSAGE_CHARS = 2000
 MAX_SESSION_ID_CHARS = 64
 MAX_AUDIO_UPLOAD_BYTES = 15 * 1024 * 1024
@@ -195,11 +205,13 @@ def create_app(
     config: AppConfig | None = None,
     transcriber=None,
     max_sessions: int = 128,
+    index_html: str | Path | None = None,
 ):
     """Create the FastAPI app and keep configuration/model loading explicit."""
     try:
         from fastapi import FastAPI, Request
         from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+        from fastapi.staticfiles import StaticFiles
     except ImportError as exc:
         raise RuntimeError(
             "Web 入口需要额外依赖，请运行：pip install -e '.[web]'"
@@ -227,6 +239,8 @@ def create_app(
         )
         default_asr_language = runtime_config.asr.language
     app = FastAPI(title="AI 花音", version="0.1.0")
+    if WEB_ASSETS_DIR.is_dir():
+        app.mount("/assets", StaticFiles(directory=WEB_ASSETS_DIR), name="assets")
     sessions: dict[str, _SessionState] = {}
 
     def evict_oldest_idle_session() -> bool:
@@ -275,7 +289,10 @@ def create_app(
 
     @app.get("/", response_class=HTMLResponse)
     async def index():
-        return WEB_HTML.read_text(encoding="utf-8")
+        page = Path(index_html) if index_html is not None else WEB_HTML
+        if not page.exists():
+            return HTMLResponse(WEB_HINT_HTML, status_code=503)
+        return page.read_text(encoding="utf-8")
 
     @app.get("/healthz")
     async def healthz():
