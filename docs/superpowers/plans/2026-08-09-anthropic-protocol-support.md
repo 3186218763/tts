@@ -392,11 +392,11 @@ def _stream_response(events):
 
 
 def _text_delta(text):
-    return {"type": "content_block_delta", "delta": {"type": "text", "text": text}}
+    return {"type": "content_block_delta", "delta": {"type": "text_delta", "text": text}}
 
 
 def _thinking_delta(text):
-    return {"type": "content_block_delta", "delta": {"type": "thinking", "thinking": text}}
+    return {"type": "content_block_delta", "delta": {"type": "thinking_delta", "thinking": text}}
 ```
 
 ```python
@@ -551,7 +551,7 @@ async def test_anthropic_stream_does_not_retry_after_partial_response():
                     if event.get("type") == "message_stop":
                         break
                     delta = event.get("delta", {})
-                    if delta.get("type") == "text":
+                    if delta.get("type") == "text_delta":
                         text = delta.get("text")
                         if text:
                             emitted = True
