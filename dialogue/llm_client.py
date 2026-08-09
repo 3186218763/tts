@@ -132,7 +132,7 @@ class LLMClient:
                     if event.get("type") == "message_stop":
                         break
                     delta = event.get("delta", {})
-                    if delta.get("type") == "text":
+                    if delta.get("type") == "text_delta":
                         text = delta.get("text")
                         if text:
                             emitted = True

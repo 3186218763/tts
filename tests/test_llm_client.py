@@ -301,11 +301,11 @@ def _stream_response(events):
 
 
 def _text_delta(text):
-    return {"type": "content_block_delta", "delta": {"type": "text", "text": text}}
+    return {"type": "content_block_delta", "delta": {"type": "text_delta", "text": text}}
 
 
 def _thinking_delta(text):
-    return {"type": "content_block_delta", "delta": {"type": "thinking", "thinking": text}}
+    return {"type": "content_block_delta", "delta": {"type": "thinking_delta", "thinking": text}}
 
 
 @pytest.mark.asyncio
