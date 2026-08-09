@@ -1,3 +1,5 @@
+import pytest
+
 from config import load_config
 
 
@@ -93,3 +95,34 @@ def test_load_config_supports_legacy_max_turns(tmp_path):
     )
 
     assert load_config(str(path)).max_turns == 7
+
+
+def test_load_config_defaults_protocol_to_openai(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text(_base_yaml(), encoding="utf-8")
+
+    assert load_config(str(path)).llm.protocol == "openai"
+
+
+def test_load_config_reads_anthropic_protocol(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        _base_yaml().replace("base_url: https://example.test",
+                             "base_url: https://opencode.ai/zen/go\n  protocol: anthropic"),
+        encoding="utf-8",
+    )
+
+    assert load_config(str(path)).llm.protocol == "anthropic"
+    assert load_config(str(path)).llm.base_url == "https://opencode.ai/zen/go"
+
+
+def test_load_config_rejects_invalid_protocol(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        _base_yaml().replace("base_url: https://example.test",
+                             "base_url: https://example.test\n  protocol: gpt"),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="protocol"):
+        load_config(str(path))

@@ -8,9 +8,16 @@ class LLMConfig:
     api_key: str
     base_url: str
     model: str
+    protocol: str = "openai"
     temperature: float = 0.8
     max_tokens: int = 400
     frequency_penalty: float = 0.15
+
+    def __post_init__(self):
+        if self.protocol not in ("openai", "anthropic"):
+            raise ValueError(
+                f"llm.protocol 必须是 openai 或 anthropic，当前为 {self.protocol!r}"
+            )
 
 
 @dataclass
