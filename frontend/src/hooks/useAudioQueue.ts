@@ -109,6 +109,16 @@ export function useAudioQueue() {
     );
   }, []);
 
+  // 队列首次获得条目时自动播放（enqueue 只入队，播放由本 effect 驱动）；
+  // 播放中/用户手动暂停时 activeRef 非 null 会跳过，不打断用户控制。
+  useEffect(() => {
+    const first = items[0];
+    if (!first) return;
+    if (activeRef.current === null && audioRef.current?.paused) {
+      playItem(first);
+    }
+  }, [items, playItem]);
+
   const toggle = useCallback(
     (item: QueueItem) => {
       if (activeRef.current === item.key && audioRef.current && !audioRef.current.paused) {

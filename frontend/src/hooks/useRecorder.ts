@@ -23,6 +23,7 @@ export function useRecorder({ enabled, onTranscript }: UseRecorderOptions) {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const timerRef = useRef<number | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const startingRef = useRef(false);
 
   useEffect(
     () => () => {
@@ -40,7 +41,7 @@ export function useRecorder({ enabled, onTranscript }: UseRecorderOptions) {
   }, []);
 
   const start = useCallback(async () => {
-    if (!enabled || recorderRef.current) return;
+    if (!enabled || recorderRef.current || startingRef.current) return;
     if (!window.isSecureContext) {
       setError("insecure");
       return;
@@ -49,8 +50,10 @@ export function useRecorder({ enabled, onTranscript }: UseRecorderOptions) {
       setError("mic");
       return;
     }
+    startingRef.current = true;
+    let stream: MediaStream | null = null;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      stream = await navigator.mediaDevices.getUserMedia({
         audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
       });
       const mimeType = SUPPORTED_TYPES.find((type) => MediaRecorder.isTypeSupported(type));
@@ -62,7 +65,8 @@ export function useRecorder({ enabled, onTranscript }: UseRecorderOptions) {
       });
       recorder.addEventListener("stop", () => {
         if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-        stream.getTracks().forEach((track) => track.stop());
+        // 事件处理器仅在 getUserMedia 成功后才注册，流必然存在
+        stream!.getTracks().forEach((track) => track.stop());
         recorderRef.current = null;
         setIsRecording(false);
         const blob = new Blob(chunksRef.current, {
@@ -85,10 +89,12 @@ export function useRecorder({ enabled, onTranscript }: UseRecorderOptions) {
         if (recorderRef.current?.state === "recording") recorderRef.current.stop();
       }, RECORD_LIMIT_MS);
     } catch {
-      recorderRef.current?.stream.getTracks().forEach((track) => track.stop());
+      stream?.getTracks().forEach((track) => track.stop());
       recorderRef.current = null;
       setIsRecording(false);
       setError("mic");
+    } finally {
+      startingRef.current = false;
     }
   }, [enabled, onTranscript]);
 

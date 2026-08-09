@@ -47,10 +47,17 @@
 @media (max-width: 768px) {
   .side {
     position: fixed; top: 0; bottom: 0; left: 0;
-    transform: translateX(-105%); transition: transform var(--dur-med) var(--ease);
+    transform: translateX(-105%);
+    transition: transform var(--dur-med) var(--ease), visibility 0s linear var(--dur-med);
+    visibility: hidden;
     background: #12161a;
   }
-  .side.open { transform: translateX(0); box-shadow: 0 0 60px rgba(0, 0, 0, 0.6); }
+  .side.open {
+    transform: translateX(0);
+    transition: transform var(--dur-med) var(--ease);
+    visibility: visible;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+  }
   .overlay {
     display: block; position: fixed; inset: 0; z-index: 1;
     background: rgba(0, 0, 0, 0.5); opacity: 0; pointer-events: none;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAudioQueue } from "./hooks/useAudioQueue";
 import { useChat } from "./hooks/useChat";
 import { useRecorder } from "./hooks/useRecorder";
@@ -15,16 +15,22 @@ export default function App() {
   const chat = useChat({ enqueueAudio: audio.enqueue });
   const recorder = useRecorder({ enabled: chat.asrEnabled, onTranscript: chat.send });
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  const closeDrawer = useCallback(() => {
+    setDrawerOpen(false);
+    drawerBtnRef.current?.focus();
+  }, []);
 
   // ESC 关闭抽屉（规格 §4.2 抽屉交互规范）
   useEffect(() => {
     if (!drawerOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setDrawerOpen(false);
+      if (event.key === "Escape") closeDrawer();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [drawerOpen]);
+  }, [closeDrawer, drawerOpen]);
 
   // 徽标显示优先级：录音错误 > 转写/录音中 > 生成状态
   const displayStatus: Status = recorder.error === "mic" ? "mic-error"
@@ -46,13 +52,14 @@ export default function App() {
         onReset={chat.reset}
         disabled={chat.busy}
         open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
+        onClose={closeDrawer}
       />
       <main className={styles.main}>
         <header className={styles.topbar}>
           <button
             type="button"
             className={styles.drawerBtn}
+            ref={drawerBtnRef}
             onClick={() => setDrawerOpen(true)}
             aria-label="打开角色信息"
             aria-expanded={drawerOpen}
