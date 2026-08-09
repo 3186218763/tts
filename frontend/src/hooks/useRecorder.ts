@@ -27,6 +27,9 @@ export function useRecorder({ enabled, onTranscript }: UseRecorderOptions) {
   useEffect(
     () => () => {
       if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+      if (recorderRef.current && recorderRef.current.state !== "inactive") {
+        recorderRef.current.stop();
+      }
     },
     [],
   );
@@ -82,6 +85,9 @@ export function useRecorder({ enabled, onTranscript }: UseRecorderOptions) {
         if (recorderRef.current?.state === "recording") recorderRef.current.stop();
       }, RECORD_LIMIT_MS);
     } catch {
+      recorderRef.current?.stream.getTracks().forEach((track) => track.stop());
+      recorderRef.current = null;
+      setIsRecording(false);
       setError("mic");
     }
   }, [enabled, onTranscript]);
