@@ -53,7 +53,7 @@ def test_default_dataset_paths_use_project_dataset(monkeypatch):
 
     args = train.parse_args()
 
-    assert args.list_path == Path("/home/mtr/tt/tts/data/dataset/annotation.list")
-    assert args.wav_dir == Path("/home/mtr/tt/tts/data/dataset/audio")
+    assert args.list_path == train.DEFAULT_DATASET_DIR / "annotation.list"
+    assert args.wav_dir == train.DEFAULT_DATASET_DIR / "audio"
     assert args.batch_size_s2 == 12
     assert args.batch_size_s1 == 8
