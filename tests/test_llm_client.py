@@ -1,8 +1,10 @@
+import json
 from unittest.mock import AsyncMock, MagicMock
 
+import httpx
 import pytest
 
-from dialogue.llm_client import LLMClient
+from dialogue.llm_client import LLMClient, SUMMARY_SYSTEM_PROMPT
 
 
 def _mock_chunk(content):
@@ -173,3 +175,22 @@ async def test_summarize_chat_merges_previous_memory_and_archived_turns():
 def test_rejects_invalid_generation_settings(kwargs):
     with pytest.raises(ValueError):
         LLMClient("fake", "fake", "test", client=AsyncMock(), **kwargs)
+
+
+@pytest.mark.parametrize("protocol", ["openai", "anthropic"])
+def test_accepts_valid_protocols(protocol):
+    LLMClient("fake", "fake", "test", client=MagicMock(), protocol=protocol)
+
+
+def test_rejects_invalid_protocol():
+    with pytest.raises(ValueError, match="protocol"):
+        LLMClient("fake", "fake", "test", client=MagicMock(), protocol="gpt")
+
+
+def test_anthropic_protocol_uses_injected_http_client():
+    http = MagicMock()
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    assert client._client is http

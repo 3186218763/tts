@@ -1,7 +1,9 @@
 """DeepSeek（OpenAI 兼容）LLM 流式客户端。"""
 
+import json
 from collections.abc import AsyncIterator
 
+import httpx
 from openai import AsyncOpenAI
 
 
@@ -20,12 +22,17 @@ class LLMClient:
         api_key: str,
         base_url: str,
         model: str,
-        client: AsyncOpenAI | None = None,
+        client: AsyncOpenAI | httpx.AsyncClient | None = None,
         max_retries: int = 1,
         temperature: float = 0.8,
         max_tokens: int = 400,
         frequency_penalty: float = 0.15,
+        protocol: str = "openai",
     ):
+        if protocol not in ("openai", "anthropic"):
+            raise ValueError(
+                f"protocol must be 'openai' or 'anthropic', got {protocol!r}"
+            )
         if max_retries < 0:
             raise ValueError("max_retries must not be negative")
         if not 0 < temperature <= 2:
@@ -34,7 +41,14 @@ class LLMClient:
             raise ValueError("max_tokens must be positive")
         if not -2 <= frequency_penalty <= 2:
             raise ValueError("frequency_penalty must be in [-2, 2]")
-        self._client = client or AsyncOpenAI(api_key=api_key, base_url=base_url)
+        self._client = client or (
+            AsyncOpenAI(api_key=api_key, base_url=base_url)
+            if protocol == "openai"
+            else httpx.AsyncClient(timeout=60)
+        )
+        self._api_key = api_key
+        self._base_url = base_url
+        self._protocol = protocol
         self._model = model
         self._max_retries = max_retries
         self._temperature = temperature
