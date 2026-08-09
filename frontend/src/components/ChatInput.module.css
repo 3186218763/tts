@@ -1,0 +1,34 @@
+.bar {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px;
+  background: var(--panel); border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: var(--shadow-panel), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.mic {
+  width: 38px; height: 38px; border-radius: 50%; flex: 0 0 38px;
+  border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.03);
+  display: grid; place-items: center;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.mic:hover { border-color: var(--accent); }
+.dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--danger); box-shadow: 0 0 8px rgba(236, 102, 93, 0.55);
+  transition: all var(--dur-fast) var(--ease);
+}
+.mic.recording { border-color: var(--danger); }
+.mic.recording .dot { border-radius: 2px; animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.fieldWrap { flex: 1; min-width: 0; position: relative; }
+.field {
+  display: block; width: 100%; min-height: 42px; max-height: 140px; resize: vertical;
+  border: 0; outline: 0; background: transparent; color: var(--text);
+}
+.field::placeholder { color: var(--muted); }
+.count { position: absolute; right: 4px; bottom: 2px; font-size: 10px; color: #e8b47a; pointer-events: none; }
+.send {
+  width: 40px; height: 40px; border-radius: 12px; flex: 0 0 40px; display: grid; place-items: center;
+  background: var(--accent-gradient); color: #241310; font-size: 20px; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(255, 145, 125, 0.35);
+  transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.send:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255, 145, 125, 0.45); }

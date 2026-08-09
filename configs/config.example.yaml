@@ -1,5 +1,8 @@
 llm:
   api_key: "sk-your-deepseek-api-key"
+  # openai: OpenAI 兼容格式（默认）
+  # anthropic: Anthropic 原生协议，base_url 填 SDK 风格根地址（如 https://opencode.ai/zen/go，自动补 /v1/messages）
+  protocol: openai
   base_url: "https://api.deepseek.com"
   model: "deepseek-v4-flash"
   # Voice-oriented replies should be concise and varied without becoming

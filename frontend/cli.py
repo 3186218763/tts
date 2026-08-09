@@ -21,6 +21,7 @@ async def main() -> None:
         api_key=config.llm.api_key,
         base_url=config.llm.base_url,
         model=config.llm.model,
+        protocol=config.llm.protocol,
         temperature=config.llm.temperature,
         max_tokens=config.llm.max_tokens,
         frequency_penalty=config.llm.frequency_penalty,

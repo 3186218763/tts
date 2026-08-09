@@ -1,0 +1,20 @@
+.row { display: flex; }
+.ai { justify-content: flex-start; }
+.user { justify-content: flex-end; }
+.bubble {
+  max-width: 76%; padding: 10px 14px; border-radius: 14px;
+  font-size: 13.5px; white-space: pre-wrap; overflow-wrap: anywhere;
+  animation: riseIn var(--dur-med) var(--ease) both;
+}
+.ai .bubble {
+  background: var(--ai-bubble); border: 1px solid rgba(255, 255, 255, 0.09);
+  border-bottom-left-radius: 5px; box-shadow: var(--shadow-bubble);
+}
+.user .bubble {
+  background: var(--user-bubble); border: 1px solid var(--user-bubble-line);
+  border-bottom-right-radius: 5px; box-shadow: var(--shadow-bubble);
+}
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

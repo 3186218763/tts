@@ -1,8 +1,10 @@
+import json
 from unittest.mock import AsyncMock, MagicMock
 
+import httpx
 import pytest
 
-from dialogue.llm_client import LLMClient
+from dialogue.llm_client import LLMClient, SUMMARY_SYSTEM_PROMPT
 
 
 def _mock_chunk(content):
@@ -173,3 +175,407 @@ async def test_summarize_chat_merges_previous_memory_and_archived_turns():
 def test_rejects_invalid_generation_settings(kwargs):
     with pytest.raises(ValueError):
         LLMClient("fake", "fake", "test", client=AsyncMock(), **kwargs)
+
+
+@pytest.mark.parametrize("protocol", ["openai", "anthropic"])
+def test_accepts_valid_protocols(protocol):
+    LLMClient("fake", "fake", "test", client=MagicMock(), protocol=protocol)
+
+
+def test_rejects_invalid_protocol():
+    with pytest.raises(ValueError, match="protocol"):
+        LLMClient("fake", "fake", "test", client=MagicMock(), protocol="gpt")
+
+
+def test_anthropic_protocol_uses_injected_http_client():
+    http = MagicMock()
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    assert client._client is http
+
+
+def _mock_http(response=None):
+    http = MagicMock()
+    http.post = AsyncMock(return_value=response)
+    return http
+
+
+def _summary_response(*blocks):
+    response = MagicMock()
+    response.status_code = 200
+    response.json.return_value = {"content": list(blocks)}
+    return response
+
+
+@pytest.mark.asyncio
+async def test_anthropic_summarize_merges_system_and_extracts_text():
+    captured = {}
+
+    async def _post(url, **kwargs):
+        captured["url"] = url
+        captured["headers"] = kwargs["headers"]
+        captured["json"] = kwargs["json"]
+        return _summary_response(
+            {"type": "thinking", "thinking": "内部推理"},
+            {"type": "text", "text": " 用户叫小明。 "},
+        )
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient(
+        "fake-key", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    summary = await client.summarize_chat(
+        previous_summary="",
+        messages=[
+            {"role": "system", "content": "人设"},
+            {"role": "user", "content": "我叫小明"},
+        ],
+        max_chars=100,
+    )
+
+    assert summary == "用户叫小明。"
+    assert captured["url"] == "https://opencode.ai/zen/go/v1/messages"
+    assert captured["headers"]["x-api-key"] == "fake-key"
+    assert captured["headers"]["anthropic-version"] == "2023-06-01"
+    body = captured["json"]
+    # 摘要路径的 system 固定为 SUMMARY_SYSTEM_PROMPT,归档对话拼进 user prompt
+    assert body["system"] == SUMMARY_SYSTEM_PROMPT
+    assert "我叫小明" in body["messages"][0]["content"]
+    assert body["stream"] is False
+    assert body["temperature"] == 0.2
+    assert "frequency_penalty" not in body
+
+
+@pytest.mark.asyncio
+async def test_anthropic_summarize_raises_on_empty_text():
+    http = _mock_http()
+    http.post = AsyncMock(
+        return_value=_summary_response({"type": "thinking", "thinking": "无"})
+    )
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    with pytest.raises(RuntimeError, match="empty"):
+        await client.summarize_chat(
+            previous_summary="", messages=[{"role": "user", "content": "hi"}],
+            max_chars=100,
+        )
+
+    # 空摘要是确定性失败,不应进入重试循环重复发请求
+    assert http.post.await_count == 1
+
+
+@pytest.mark.asyncio
+async def test_anthropic_base_url_with_v1_suffix_not_doubled():
+    captured = {}
+
+    async def _post(url, **kwargs):
+        captured["url"] = url
+        return _summary_response({"type": "text", "text": "ok"})
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go/v1", "test",
+        client=http, protocol="anthropic",
+    )
+    await client.summarize_chat(
+        previous_summary="", messages=[{"role": "user", "content": "hi"}],
+        max_chars=100,
+    )
+    assert captured["url"] == "https://opencode.ai/zen/go/v1/messages"
+
+
+async def _aiter_lines(events):
+    for event in events:
+        yield f"data: {json.dumps(event)}"
+
+
+def _stream_response(events):
+    response = MagicMock()
+    response.status_code = 200
+    response.aiter_lines = lambda: _aiter_lines(events)
+    return response
+
+
+def _text_delta(text):
+    return {"type": "content_block_delta", "delta": {"type": "text_delta", "text": text}}
+
+
+def _thinking_delta(text):
+    return {"type": "content_block_delta", "delta": {"type": "thinking_delta", "thinking": text}}
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_yields_text_and_skips_thinking():
+    events = [
+        {"type": "message_start", "message": {"id": "m1"}},
+        {"type": "content_block_start", "index": 0, "content_block": {"type": "thinking", "thinking": ""}},
+        _thinking_delta("内部推理"),
+        {"type": "content_block_stop", "index": 0},
+        {"type": "content_block_start", "index": 1, "content_block": {"type": "text", "text": ""}},
+        _text_delta("你好"),
+        _text_delta("呀"),
+        {"type": "content_block_stop", "index": 1},
+        {"type": "message_stop"},
+    ]
+    http = _mock_http(_stream_response(events))
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    tokens = [t async for t in client.stream_chat([{"role": "user", "content": "hi"}])]
+
+    assert tokens == ["你好", "呀"]
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_merges_system_and_omits_frequency_penalty():
+    captured = {}
+    events = [_text_delta("回复")]
+
+    async def _post(url, **kwargs):
+        captured["url"] = url
+        captured["json"] = kwargs["json"]
+        return _stream_response(events)
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+        temperature=0.75, max_tokens=320, frequency_penalty=0.2,
+    )
+    tokens = [t async for t in client.stream_chat(
+        [
+            {"role": "system", "content": "人设"},
+            {"role": "system", "content": "记忆摘要"},
+            {"role": "user", "content": "hi"},
+        ]
+    )]
+
+    assert tokens == ["回复"]
+    body = captured["json"]
+    assert body["system"] == "人设\n\n记忆摘要"
+    assert body["messages"] == [{"role": "user", "content": "hi"}]
+    assert body["temperature"] == 0.75
+    assert body["max_tokens"] == 320
+    assert "frequency_penalty" not in body
+    assert body["stream"] is True
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_retries_initial_failure_once():
+    calls = 0
+    events = [_text_delta("重试成功")]
+
+    async def _post(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise httpx.ConnectError("temporary")
+        return _stream_response(events)
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient("fake", "https://opencode.ai/zen/go", "test", client=http, protocol="anthropic")
+    tokens = [t async for t in client.stream_chat([{"role": "user", "content": "hi"}])]
+
+    assert tokens == ["重试成功"]
+    assert calls == 2
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_does_not_retry_after_partial_response():
+    calls = 0
+    events = [_text_delta("部分")]
+
+    async def _post(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+
+        async def _lines():
+            async for line in _aiter_lines(events):
+                yield line
+            raise RuntimeError("connection lost")
+
+        response = MagicMock()
+        response.status_code = 200
+        response.aiter_lines = _lines
+        return response
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient("fake", "https://opencode.ai/zen/go", "test", client=http, protocol="anthropic")
+    with pytest.raises(RuntimeError, match="connection lost"):
+        _ = [t async for t in client.stream_chat([{"role": "user", "content": "hi"}])]
+
+    assert calls == 1
+
+
+@pytest.mark.asyncio
+async def test_summarize_openai_raises_on_empty_text_without_retry():
+    calls = 0
+    response = MagicMock()
+    response.choices = [MagicMock()]
+    response.choices[0].message.content = ""
+
+    async def mock_create(**kwargs):
+        nonlocal calls
+        calls += 1
+        return response
+
+    mock_openai = AsyncMock()
+    mock_openai.chat.completions.create = mock_create
+
+    client = LLMClient("fake", "fake", "test", client=mock_openai, max_retries=2)
+    with pytest.raises(RuntimeError, match="empty"):
+        await client.summarize_chat(
+            previous_summary="", messages=[], max_chars=100
+        )
+
+    # 空摘要是确定性失败,不应在重试循环里重复请求
+    assert calls == 1
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_error_event_retries_before_first_token():
+    calls = 0
+
+    async def _post(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return _stream_response([
+                {"type": "error", "error": {"type": "overloaded_error", "message": "Overloaded"}}
+            ])
+        return _stream_response([_text_delta("重试成功")])
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    tokens = [t async for t in client.stream_chat([{"role": "user", "content": "hi"}])]
+
+    assert tokens == ["重试成功"]
+    assert calls == 2
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_error_event_after_text_does_not_retry():
+    calls = 0
+    events = [
+        _text_delta("部分"),
+        {"type": "error", "error": {"type": "overloaded_error", "message": "Overloaded"}},
+    ]
+
+    async def _post(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return _stream_response(events)
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    with pytest.raises(RuntimeError, match="Overloaded"):
+        _ = [t async for t in client.stream_chat([{"role": "user", "content": "hi"}])]
+
+    assert calls == 1
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_skips_non_json_data_lines():
+    lines = [
+        "data: [DONE]",
+        "data:",
+        "data: " + json.dumps(_text_delta("你好")),
+        "data: [DONE]",
+        "data: " + json.dumps({"type": "message_stop"}),
+    ]
+
+    async def _lines():
+        for line in lines:
+            yield line
+
+    response = MagicMock()
+    response.status_code = 200
+    response.aiter_lines = _lines
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=_mock_http(response), protocol="anthropic",
+    )
+    tokens = [t async for t in client.stream_chat([{"role": "user", "content": "hi"}])]
+
+    assert tokens == ["你好"]
+
+
+@pytest.mark.asyncio
+async def test_anthropic_stream_tolerates_system_message_without_content():
+    http = _mock_http(_stream_response([_text_delta("回复")]))
+
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test",
+        client=http, protocol="anthropic",
+    )
+    tokens = [t async for t in client.stream_chat(
+        [{"role": "system"}, {"role": "user", "content": "hi"}]
+    )]
+
+    assert tokens == ["回复"]
+
+
+def test_rejects_invalid_protocol_with_consistent_chinese_message():
+    with pytest.raises(ValueError, match="必须是 openai 或 anthropic"):
+        LLMClient("fake", "fake", "test", client=MagicMock(), protocol="gpt")
+
+
+@pytest.mark.asyncio
+async def test_aclose_closes_openai_client():
+    mock_openai = AsyncMock()
+    mock_openai.close = AsyncMock()
+
+    client = LLMClient("fake", "fake", "test", client=mock_openai)
+    await client.aclose()
+
+    mock_openai.close.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_aclose_closes_httpx_client():
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test", protocol="anthropic"
+    )
+    assert not client._client.is_closed
+
+    await client.aclose()
+
+    assert client._client.is_closed
+
+
+@pytest.mark.asyncio
+async def test_anthropic_protocol_without_injected_client_uses_http_client():
+    client = LLMClient(
+        "fake", "https://opencode.ai/zen/go", "test", protocol="anthropic"
+    )
+    assert isinstance(client._client, httpx.AsyncClient)
+    await client.aclose()
