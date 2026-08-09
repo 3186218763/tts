@@ -24,16 +24,23 @@
 
 - [ ] **步骤 1:编写失败的测试**
 
-在 `tests/test_llm_client.py` 末尾追加:
+修改 `tests/test_llm_client.py` 顶部 import 块(第 1-5 行)为:
 
 ```python
 import json
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
+import pytest
 
-from dialogue.llm_client import LLMClient
+from dialogue.llm_client import LLMClient, SUMMARY_SYSTEM_PROMPT
+```
 
+(文件顶部 import 的 `SUMMARY_SYSTEM_PROMPT` 供任务 2 使用;任务 1 只用到 `LLMClient`。)
 
+在 `tests/test_llm_client.py` 末尾追加:
+
+```python
 @pytest.mark.parametrize("protocol", ["openai", "anthropic"])
 def test_accepts_valid_protocols(protocol):
     LLMClient("fake", "fake", "test", client=MagicMock(), protocol=protocol)
@@ -189,8 +196,9 @@ async def test_anthropic_summarize_merges_system_and_extracts_text():
     assert captured["headers"]["x-api-key"] == "fake-key"
     assert captured["headers"]["anthropic-version"] == "2023-06-01"
     body = captured["json"]
-    assert body["system"] == "人设"
-    assert body["messages"] == [{"role": "user", "content": "我叫小明"}]
+    # 摘要路径的 system 固定为 SUMMARY_SYSTEM_PROMPT,归档对话拼进 user prompt
+    assert body["system"] == SUMMARY_SYSTEM_PROMPT
+    assert "我叫小明" in body["messages"][0]["content"]
     assert body["stream"] is False
     assert body["temperature"] == 0.2
     assert "frequency_penalty" not in body
@@ -213,7 +221,8 @@ async def test_anthropic_summarize_raises_on_empty_text():
 ```
 
 ```python
-def test_anthropic_base_url_with_v1_suffix_not_doubled():
+@pytest.mark.asyncio
+async def test_anthropic_base_url_with_v1_suffix_not_doubled():
     captured = {}
 
     async def _post(url, **kwargs):
@@ -227,14 +236,12 @@ def test_anthropic_base_url_with_v1_suffix_not_doubled():
         "fake", "https://opencode.ai/zen/go/v1", "test",
         client=http, protocol="anthropic",
     )
-    client.summarize_chat(
+    await client.summarize_chat(
         previous_summary="", messages=[{"role": "user", "content": "hi"}],
         max_chars=100,
     )
     assert captured["url"] == "https://opencode.ai/zen/go/v1/messages"
 ```
-
-(最后这个测试是同步函数调用 async 方法——需改为 `@pytest.mark.asyncio` 并 `await`,写作时注意。)
 
 - [ ] **步骤 2:运行测试验证失败**
 
