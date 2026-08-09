@@ -9,7 +9,7 @@
 - **流式语音对话**：LLM 边生成、TTS 边合成、喇叭边播放，asyncio 三段流水线并行，首音延迟低
 - **长对话记忆**：最近 `recent_turns` 轮保留原文，更早历史滚动压缩为 LLM 摘要，可支撑数百轮对话
 - **自然语音切分**：按句末标点 / 逗号 / 空格切句，保护括号动作与引用，超长文本由 GPT-SoVITS `cut5` 兜底
-- **CLI 与 Web 双前端**：CLI 本地播放；Web 支持 SSE 流式文字 + WAV 音频、浏览器录音（faster-whisper 本地转写）
+- **CLI 与 Web 双前端**：CLI 本地播放；Web（React + TypeScript）支持 SSE 流式文字 + WAV 音频、浏览器录音（faster-whisper 本地转写），暖夜深色界面
 - **训练数据管线**：白名单采集 → 人声分离 → 静音切分 → 歌声/能量过滤 → 声纹过滤 → ASR 转写 → 音文一致性校验，全阶段增量断点续跑
 - **无头训练**：一条命令完成 GPT-SoVITS v2Pro 微调（文本特征 → Hubert → 语义 token → SoVITS → GPT）
 
@@ -43,8 +43,9 @@ python scripts/run_huayin_api.py --python /path/to/gptsovits/bin/python
 # CLI 模式（Ctrl+C 退出）
 python -m frontend.cli
 
-# Web 模式（浏览器打开 http://127.0.0.1:8000/，健康检查 /healthz）
-python -m frontend.web --host 127.0.0.1 --port 8000
+# Web 模式（先构建前端，再启动服务；浏览器打开 http://127.0.0.1:8000/，健康检查 /healthz）
+cd frontend && npm install && npm run build
+cd .. && python -m frontend.web --host 127.0.0.1 --port 8000
 ```
 
 仅验证本地模型推理、不启动对话层：
@@ -72,12 +73,15 @@ python scripts/test_huayin_tts.py "你好，今天也要加油。"
 │   ├── persona.py               # 花音人设 system prompt
 │   └── speech_text.py           # 台词清洗：去 Markdown/括号动作/角色名前缀
 ├── frontend/
-│   ├── cli.py                   # 命令行对话界面
-│   └── web.py                   # FastAPI + SSE 对话服务（web.html 为单页 UI）
+│   ├── src/                     # React + TypeScript 前端源码
+│   ├── dist/                    # 构建产物（npm run build 生成，不入库）
+│   ├── package.json / vite.config.ts / tsconfig.json
+│   ├── cli.py                   # CLI 前端
+│   └── web.py                   # FastAPI + SSE 对话服务（服务 dist/index.html）
 ├── scripts/                     # 数据管线 / 训练 / 运维脚本（见下表）
 ├── data/                        # 数据管线各阶段产物（见下）
 ├── model/                       # 训练好的模型权重（Git LFS）
-└── tests/                       # pytest 测试（153 个，全部 mock，不依赖外部服务）
+└── tests/                       # pytest 测试（121 个，全部 mock，不依赖外部服务）
 ```
 
 ## 配置说明
@@ -181,7 +185,7 @@ python scripts/train_gpt_sovits.py \
 python -m pytest -q
 ```
 
-153 个测试覆盖对话核心、切句、记忆压缩、流水线、Web SSE、配置加载与数据管线逻辑，
+121 个测试覆盖对话核心、切句、记忆压缩、流水线、Web SSE、配置加载与数据管线逻辑，
 全部 mock 化，不依赖外部 API 或 GPU。
 
 ## 外部依赖说明
