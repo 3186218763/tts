@@ -75,12 +75,12 @@ def merge_fewshot(
             }
         )
 
-    enabled = bool(few.get("asr_pool_enabled", False))
+    # enable_if_ready=False：保留 fewshot 原有 asr_pool_enabled，不误关已启用池
+    # enable_if_ready=True：按门槛设 true/false
     if enable_if_ready:
         enabled = _ready_to_enable(asr_pool)
-    elif not enable_if_ready:
-        # 显式 False 时不自动开启；保留调用方意图（默认不启用）
-        enabled = False
+    else:
+        enabled = bool(few.get("asr_pool_enabled", False))
 
     out = {
         "schema_version": few.get("schema_version", 1),
