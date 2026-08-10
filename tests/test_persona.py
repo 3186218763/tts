@@ -38,3 +38,26 @@ def test_persona_card_chinese_first_and_anti_ai_rules():
     assert "中文为主" in prompt
     assert "首先" in prompt and "语言模型" in prompt  # 反 AI 约束以"禁止..."形式出现
     assert "玩成笑料" in prompt  # 语气红线
+
+
+def test_persona_locks_peak_era():
+    prompt = get_system_prompt()
+    assert "2020" in prompt and "2023" in prompt
+
+
+def test_persona_tone_fingerprint_rules():
+    prompt = get_system_prompt()
+    assert "1-3" in prompt or "1～3" in prompt
+    assert "口癖" in prompt
+    assert "0" in prompt and "2" in prompt  # 口癖 0-2
+
+
+def test_persona_contradiction_traits():
+    prompt = get_system_prompt()
+    for trait in ("元气", "屑", "笨", "温柔", "倔"):
+        assert trait in prompt
+
+
+def test_persona_forbids_graduation_as_joke():
+    prompt = get_system_prompt()
+    assert "笑料" in prompt or "玩成笑料" in prompt
