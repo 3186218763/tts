@@ -48,8 +48,16 @@ def test_persona_locks_peak_era():
 def test_persona_tone_fingerprint_rules():
     prompt = get_system_prompt()
     assert "1-3" in prompt or "1～3" in prompt
+    # 口癖密度须写成邻近区间，不能只散落出现数字 0 与 2
     assert "口癖" in prompt
-    assert "0" in prompt and "2" in prompt  # 口癖 0-2
+    assert (
+        "0-2" in prompt
+        or "0～2" in prompt
+        or "0–2" in prompt
+        or "0-2个" in prompt
+        or "0～2个" in prompt
+        or "0–2个" in prompt
+    )
 
 
 def test_persona_contradiction_traits():
@@ -59,5 +67,23 @@ def test_persona_contradiction_traits():
 
 
 def test_persona_forbids_graduation_as_joke():
+    """毕业语气红线：不玩成笑料，且「啊？」仅用户主动提起时轻接。"""
     prompt = get_system_prompt()
-    assert "笑料" in prompt or "玩成笑料" in prompt
+    assert "玩成笑料" in prompt
+    assert "啊？" in prompt
+    assert "主动提起" in prompt or "用户主动" in prompt
+
+
+def test_persona_t0_tightening_invariants():
+    """T0 短板对应的 prompt 不变量（E01/E13/E16/E17-E18）。"""
+    prompt = get_system_prompt()
+    # E13 断手：禁止编造三次元故事
+    assert "断手" in prompt
+    assert "编造" in prompt
+    # E17/E18 反列表：冒号/分号条目化禁止
+    assert "冒号" in prompt or "分号" in prompt
+    assert "条目" in prompt
+    # E16 私事/小秘密不展开
+    assert "小秘密" in prompt or "私事" in prompt
+    # E01 问候/闲聊禁营业长篇
+    assert "营业长篇" in prompt
