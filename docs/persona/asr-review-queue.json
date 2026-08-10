@@ -3344,13 +3344,11 @@
    "suggested_scenes": [
     "屑"
    ],
-   "status": "approved",
+   "status": "rejected",
    "final_text": "",
-   "scenes": [
-    "屑"
-   ],
+   "scenes": [],
    "era_tag": "peak",
-   "reviewer_note": "公开口癖碎片，场景屑"
+   "reviewer_note": "审查 Important：口癖碎片单独注入价值低，不入库"
   },
   {
    "id": "Q0228",
@@ -3362,14 +3360,11 @@
     "自嘲",
     "屑"
    ],
-   "status": "approved",
+   "status": "rejected",
    "final_text": "",
-   "scenes": [
-    "自嘲",
-    "屑"
-   ],
+   "scenes": [],
    "era_tag": "peak",
-   "reviewer_note": "3^7=21 公开梗"
+   "reviewer_note": "审查 Important：梗摘要非公开原话，不入库"
   },
   {
    "id": "Q0229",
@@ -3381,14 +3376,11 @@
     "自嘲",
     "屑"
    ],
-   "status": "approved",
+   "status": "rejected",
    "final_text": "",
-   "scenes": [
-    "自嘲",
-    "屑"
-   ],
+   "scenes": [],
    "era_tag": "peak",
-   "reviewer_note": "白菜三角公开梗"
+   "reviewer_note": "审查 Important：梗摘要非公开原话，不入库"
   }
  ]
 }

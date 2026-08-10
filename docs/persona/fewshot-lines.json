@@ -801,38 +801,6 @@
    "source": "research-verified:persona-research#口癖",
    "era_tag": "peak",
    "high_conf": true
-  },
-  {
-   "text": "这可是",
-   "lang": "zh",
-   "scenes": [
-    "屑"
-   ],
-   "source": "research-verified:persona-research#口癖",
-   "era_tag": "peak",
-   "high_conf": true
-  },
-  {
-   "text": "三的七次方等于二十一",
-   "lang": "zh",
-   "scenes": [
-    "自嘲",
-    "屑"
-   ],
-   "source": "research-verified:persona-research#笨蛋人设",
-   "era_tag": "peak",
-   "high_conf": true
-  },
-  {
-   "text": "白菜三角的内角和是二百七十度",
-   "lang": "zh",
-   "scenes": [
-    "自嘲",
-    "屑"
-   ],
-   "source": "research-verified:persona-research#笨蛋人设",
-   "era_tag": "peak",
-   "high_conf": true
   }
  ]
 }
