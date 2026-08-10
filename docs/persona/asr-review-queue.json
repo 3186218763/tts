@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "note": "待人审；不得被 build_persona_context 读取",
+ "note": "人审进行中/已审；不得被 build_persona_context 读取（仅 merge 后 asr_pool 可注入）",
  "items": [
   {
    "id": "Q0001",
@@ -9,11 +9,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0336973120_0337074240.wav",
    "avg_logprob": -0.199,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "残句"
   },
   {
    "id": "Q0002",
@@ -22,11 +22,14 @@
    "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)__0091996800_0092186240.wav",
    "avg_logprob": -0.199,
    "suggested_scenes": [],
-   "status": "pending",
-   "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "status": "edited",
+   "final_text": "我不明白，大家告诉我出来的方法",
+   "scenes": [
+    "游戏",
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "不完美中文求攻略，像她"
   },
   {
    "id": "Q0003",
@@ -35,11 +38,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0128092480_0128184000.wav",
    "avg_logprob": -0.198,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "上下文不明"
   },
   {
    "id": "Q0004",
@@ -48,11 +51,14 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0164021120_0164088000.wav",
    "avg_logprob": -0.198,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "自嘲",
+    "游戏"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "完全敗北，菜感"
   },
   {
    "id": "Q0005",
@@ -61,11 +67,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0146010560_0146185920.wav",
    "avg_logprob": -0.198,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "截断残句"
   },
   {
    "id": "Q0006",
@@ -74,11 +80,11 @@
    "source": "BV1Pb3RzGEak_[眞白花音_Official] 白菜来啦！ 7月4号 【直播回放】_(Vocals)__0164946560_0165045120.wav",
    "avg_logprob": -0.198,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "歌词感"
   },
   {
    "id": "Q0007",
@@ -87,11 +93,11 @@
    "source": "BV1ySxZzsEdj_【直播回放】【眞白花音_Official】白菜来啦 2025年10月07日21点00分_(Vocals)__0064220160_0064310720.wav",
    "avg_logprob": -0.198,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "短促追问 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0008",
@@ -102,11 +108,11 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "残句"
   },
   {
    "id": "Q0009",
@@ -115,11 +121,13 @@
    "source": "BV1Pb3RzGEak_[眞白花音_Official] 白菜来啦！ 7月4号 【直播回放】_(Vocals)__0024307840_0024422080.wav",
    "avg_logprob": -0.196,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "unknown",
-   "reviewer_note": ""
+   "scenes": [
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "欠揍吐槽"
   },
   {
    "id": "Q0010",
@@ -128,11 +136,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0203748160_0203829440.wav",
    "avg_logprob": -0.195,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "导游信息"
   },
   {
    "id": "Q0011",
@@ -141,11 +149,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0096814400_0096973120.wav",
    "avg_logprob": -0.194,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "平淡描述"
   },
   {
    "id": "Q0012",
@@ -154,11 +162,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0177045760_0177293120.wav",
    "avg_logprob": -0.194,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "ASR 乱+过长"
   },
   {
    "id": "Q0013",
@@ -169,11 +177,13 @@
    "suggested_scenes": [
     "游戏"
    ],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "游戏"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "宝可梦不要恐怖"
   },
   {
    "id": "Q0014",
@@ -182,11 +192,11 @@
    "source": "BV1odYMzXEj4_【直播回放】【眞白花音_Official】今天怎么样 2025年09月06日21点13分_(Vocals)__0005375360_0005499520.wav",
    "avg_logprob": -0.194,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "嗓子敏感，少作日常 fewshot"
   },
   {
    "id": "Q0015",
@@ -195,11 +205,13 @@
    "source": "BV1ySxZzsEdj_【直播回放】【眞白花音_Official】白菜来啦 2025年10月07日21点00分_(Vocals)__0332591680_0332696960.wav",
    "avg_logprob": -0.194,
    "suggested_scenes": [],
-   "status": "pending",
-   "final_text": "",
-   "scenes": [],
+   "status": "edited",
+   "final_text": "那么大家，明天是最后的休息",
+   "scenes": [
+    "告别"
+   ],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "毕业期告别向"
   },
   {
    "id": "Q0016",
@@ -210,11 +222,11 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "开吃口语 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0017",
@@ -223,11 +235,11 @@
    "source": "BV1Pb3RzGEak_[眞白花音_Official] 白菜来啦！ 7月4号 【直播回放】_(Vocals)__0275463040_0275578880.wav",
    "avg_logprob": -0.193,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "歌词"
   },
   {
    "id": "Q0018",
@@ -236,11 +248,11 @@
    "source": "BV1j5D9BgE1a_【眞白花音】2026_04_12 日 17_19 白菜来啦_(Vocals)__0420550400_0420619200.wav",
    "avg_logprob": -0.192,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "说明书感"
   },
   {
    "id": "Q0019",
@@ -251,11 +263,13 @@
    "suggested_scenes": [
     "问候"
    ],
-   "status": "pending",
-   "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "status": "edited",
+   "final_text": "地図の難易度高すぎん、またこれ右左どっちフェーズ、右行きます",
+   "scenes": [
+    "游戏"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "游戏吐槽+行动"
   },
   {
    "id": "Q0020",
@@ -266,11 +280,13 @@
    "suggested_scenes": [
     "自嘲"
    ],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "菠萝披萨不可原谅，研究已核"
   },
   {
    "id": "Q0021",
@@ -279,11 +295,11 @@
    "source": "BV1zaoxB1EYQ_【眞白花音】2026_04_22 三 21_01 白菜来啦_(Vocals)__0257606400_0257717760.wav",
    "avg_logprob": -0.189,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "空泛"
   },
   {
    "id": "Q0022",
@@ -294,11 +310,11 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "过长日常清单"
   },
   {
    "id": "Q0023",
@@ -309,11 +325,11 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "错乱过长"
   },
   {
    "id": "Q0024",
@@ -322,11 +338,14 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0315414080_0315517760.wav",
    "avg_logprob": -0.188,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "惊讶",
+    "情绪"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "吓人设施吐槽"
   },
   {
    "id": "Q0025",
@@ -335,11 +354,11 @@
    "source": "BV1zaoxB1EYQ_【眞白花音】2026_04_22 三 21_01 白菜来啦_(Vocals)__0207689920_0207812160.wav",
    "avg_logprob": -0.188,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "像旁白"
   },
   {
    "id": "Q0026",
@@ -348,11 +367,14 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0102675200_0102768320.wav",
    "avg_logprob": -0.185,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "惊讶",
+    "游戏"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "突然变化反应"
   },
   {
    "id": "Q0027",
@@ -361,11 +383,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0132367360_0132560640.wav",
    "avg_logprob": -0.185,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "吸烟点描述"
   },
   {
    "id": "Q0028",
@@ -376,11 +398,11 @@
    "suggested_scenes": [
     "游戏"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "ASR 乱/喝酒"
   },
   {
    "id": "Q0029",
@@ -389,11 +411,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0189551680_0189644160.wav",
    "avg_logprob": -0.184,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "ASR 错乱"
   },
   {
    "id": "Q0030",
@@ -402,11 +424,11 @@
    "source": "BV1Z29sBiEZc_[眞白花音_Official] 白菜来啦  4月29号【直播回放】_(Vocals)__0037552320_0037683840.wav",
    "avg_logprob": -0.184,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "诗词腔/幻觉"
   },
   {
    "id": "Q0031",
@@ -415,11 +437,13 @@
    "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)__0012036800_0012132480.wav",
    "avg_logprob": -0.184,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "问候"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "突然想开播，元气上播感"
   },
   {
    "id": "Q0032",
@@ -428,11 +452,14 @@
    "source": "BV1odYMzXEj4_【直播回放】【眞白花音_Official】今天怎么样 2025年09月06日21点13分_(Vocals)__0025959360_0026058560.wav",
    "avg_logprob": -0.183,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "屑",
+    "惊讶"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "マニアックすぎ"
   },
   {
    "id": "Q0033",
@@ -441,11 +468,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0250704960_0250821120.wav",
    "avg_logprob": -0.182,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "刻板印象风险"
   },
   {
    "id": "Q0034",
@@ -454,11 +481,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0119925440_0120073600.wav",
    "avg_logprob": -0.181,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "怪词 hot limit"
   },
   {
    "id": "Q0035",
@@ -467,11 +494,13 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0141573760_0141674240.wav",
    "avg_logprob": -0.18,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "中华味"
   },
   {
    "id": "Q0036",
@@ -480,11 +509,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0156677440_0156822400.wav",
    "avg_logprob": -0.179,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "平淡"
   },
   {
    "id": "Q0037",
@@ -493,11 +522,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0136349760_0136454720.wav",
    "avg_logprob": -0.179,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "残句"
   },
   {
    "id": "Q0038",
@@ -508,11 +537,11 @@
    "suggested_scenes": [
     "自嘲"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "粉丝发言"
   },
   {
    "id": "Q0039",
@@ -521,11 +550,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0136589120_0136730880.wav",
    "avg_logprob": -0.176,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "啤酒配鸡 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0040",
@@ -534,11 +563,14 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0137325760_0137442880.wav",
    "avg_logprob": -0.176,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "游戏",
+    "惊讶"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "警报消火玩梗"
   },
   {
    "id": "Q0041",
@@ -547,11 +579,11 @@
    "source": "BV1Z29sBiEZc_[眞白花音_Official] 白菜来啦  4月29号【直播回放】_(Vocals)__0037827520_0037921280.wav",
    "avg_logprob": -0.176,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "幻觉乱码"
   },
   {
    "id": "Q0042",
@@ -560,11 +592,11 @@
    "source": "BV1WQ9YBNEAp_[眞白花音_Official] 谢谢大家_再见了白菜！！  4月30号【直播回放】_(Vocals)__0214460800_0214544960.wav",
    "avg_logprob": -0.175,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "粉丝发言"
   },
   {
    "id": "Q0043",
@@ -573,11 +605,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0210158400_0210409600.wav",
    "avg_logprob": -0.174,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "像念稿"
   },
   {
    "id": "Q0044",
@@ -586,11 +618,11 @@
    "source": "BV1zaoxB1EYQ_【眞白花音】2026_04_22 三 21_01 白菜来啦_(Vocals)__0276409280_0276497920.wav",
    "avg_logprob": -0.174,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "粉丝祝福"
   },
   {
    "id": "Q0045",
@@ -599,11 +631,11 @@
    "source": "BV1j5D9BgE1a_【眞白花音】2026_04_12 日 17_19 白菜来啦_(Vocals)__0380222400_0380306880.wav",
    "avg_logprob": -0.173,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "不明"
   },
   {
    "id": "Q0046",
@@ -614,11 +646,11 @@
    "suggested_scenes": [
     "问候"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "空泛"
   },
   {
    "id": "Q0047",
@@ -627,11 +659,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0314344960_0314490560.wav",
    "avg_logprob": -0.172,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "过具体场景"
   },
   {
    "id": "Q0048",
@@ -640,11 +672,13 @@
    "source": "BV1j5D9BgE1a_【眞白花音】2026_04_12 日 17_19 白菜来啦_(Vocals)__0386441600_0386514880.wav",
    "avg_logprob": -0.172,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "惊讶"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "短促好奇"
   },
   {
    "id": "Q0049",
@@ -653,11 +687,13 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0238326080_0238420800.wav",
    "avg_logprob": -0.171,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "通じたかな 不完美沟通"
   },
   {
    "id": "Q0050",
@@ -666,11 +702,11 @@
    "source": "BV1WQ9YBNEAp_[眞白花音_Official] 谢谢大家_再见了白菜！！  4月30号【直播回放】_(Vocals)__0319433600_0319536320.wav",
    "avg_logprob": -0.171,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "unknown",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "对中国文化的惊讶感 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0051",
@@ -679,11 +715,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0223024960_0223121600.wav",
    "avg_logprob": -0.169,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "ASR 怪"
   },
   {
    "id": "Q0052",
@@ -692,11 +728,13 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0344207040_0344299840.wav",
    "avg_logprob": -0.169,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "爆米花重要"
   },
   {
    "id": "Q0053",
@@ -707,11 +745,14 @@
    "suggested_scenes": [
     "情绪"
    ],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物",
+    "情绪"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "可爱甜点忍不住"
   },
   {
    "id": "Q0054",
@@ -723,11 +764,14 @@
     "自嘲",
     "食物"
    ],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物",
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "不吃蔬菜经典"
   },
   {
    "id": "Q0055",
@@ -738,11 +782,11 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "小众"
   },
   {
    "id": "Q0056",
@@ -751,11 +795,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0205955520_0206065600.wav",
    "avg_logprob": -0.166,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "平淡"
   },
   {
    "id": "Q0057",
@@ -764,11 +808,13 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0207383360_0207481600.wav",
    "avg_logprob": -0.163,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "夸赞"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "すごくない 回夸"
   },
   {
    "id": "Q0058",
@@ -777,11 +823,11 @@
    "source": "BV1grQ3B1EMH_【眞白花音】2026_04_14 二 20_01 白菜来啦_(Vocals)__0109987840_0110094400.wav",
    "avg_logprob": -0.163,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "游戏卡名"
   },
   {
    "id": "Q0059",
@@ -792,11 +838,11 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "过长"
   },
   {
    "id": "Q0060",
@@ -805,11 +851,11 @@
    "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点34分_(Vocals)__0030071680_0030206720.wav",
    "avg_logprob": -0.162,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "轻微修 ASR 断句 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0061",
@@ -818,11 +864,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0092264640_0092476800.wav",
    "avg_logprob": -0.161,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "过长"
   },
   {
    "id": "Q0062",
@@ -831,11 +877,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0303759040_0303892160.wav",
    "avg_logprob": -0.161,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "念历史"
   },
   {
    "id": "Q0063",
@@ -844,11 +890,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0066076800_0066179200.wav",
    "avg_logprob": -0.16,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "小众气味"
   },
   {
    "id": "Q0064",
@@ -857,11 +903,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0137442880_0137530880.wav",
    "avg_logprob": -0.16,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "わさび比较 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0065",
@@ -870,11 +916,11 @@
    "source": "BV145oABfEfv_【直播回放】菜鸟直播第1599期_(Vocals)__0461227520_0461316160.wav",
    "avg_logprob": -0.16,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "百科腔/非口语"
   },
   {
    "id": "Q0066",
@@ -883,11 +929,11 @@
    "source": "BV1BvGwznEg6_[眞白花音_Official] 谢谢200w粉丝！！！！！！！ 7月8号_晚 【直播回放】_(Vocals)__0248197760_0248296320.wav",
    "avg_logprob": -0.159,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "残句"
   },
   {
    "id": "Q0067",
@@ -896,11 +942,14 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0116040000_0116137280.wav",
    "avg_logprob": -0.158,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物",
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "締めない 屑吐槽"
   },
   {
    "id": "Q0068",
@@ -909,11 +958,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0205817920_0205890880.wav",
    "avg_logprob": -0.157,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0069",
@@ -922,11 +971,11 @@
    "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点34分_(Vocals)__0076021120_0076129600.wav",
    "avg_logprob": -0.157,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "流鼻涕感冒闲聊 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0070",
@@ -935,11 +984,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0201736000_0201843840.wav",
    "avg_logprob": -0.156,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0071",
@@ -950,11 +999,13 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "不好吃但演出有趣"
   },
   {
    "id": "Q0072",
@@ -963,11 +1014,11 @@
    "source": "BV1Pb3RzGEak_[眞白花音_Official] 白菜来啦！ 7月4号 【直播回放】_(Vocals)__0298597120_0298722240.wav",
    "avg_logprob": -0.155,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "歌词/文艺"
   },
   {
    "id": "Q0073",
@@ -976,11 +1027,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0087463360_0087598400.wav",
    "avg_logprob": -0.154,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "调查队旁白"
   },
   {
    "id": "Q0074",
@@ -989,11 +1040,13 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0106760640_0106845120.wav",
    "avg_logprob": -0.154,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "炸酱面来了"
   },
   {
    "id": "Q0075",
@@ -1002,11 +1055,11 @@
    "source": "BV1j5D9BgE1a_【眞白花音】2026_04_12 日 17_19 白菜来啦_(Vocals)__0374642560_0374716160.wav",
    "avg_logprob": -0.154,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "残句"
   },
   {
    "id": "Q0076",
@@ -1015,11 +1068,11 @@
    "source": "BV18ro9BVEQJ_【眞白花音】2026_04_25 六 20_18 白菜来啦_(Vocals)__0134440960_0134540800.wav",
    "avg_logprob": -0.154,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "歌词感"
   },
   {
    "id": "Q0077",
@@ -1028,11 +1081,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0213570240_0213673920.wav",
    "avg_logprob": -0.153,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "残句"
   },
   {
    "id": "Q0078",
@@ -1041,11 +1094,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0111480640_0111554560.wav",
    "avg_logprob": -0.152,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "伸懒腰元气 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0079",
@@ -1054,11 +1107,13 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0145161280_0145278720.wav",
    "avg_logprob": -0.152,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "省钱一鸡"
   },
   {
    "id": "Q0080",
@@ -1067,11 +1122,11 @@
    "source": "BV1WQ9YBNEAp_[眞白花音_Official] 谢谢大家_再见了白菜！！  4月30号【直播回放】_(Vocals)__0358705280_0358845120.wav",
    "avg_logprob": -0.152,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "EVA 梗/歌词"
   },
   {
    "id": "Q0081",
@@ -1082,11 +1137,11 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0082",
@@ -1095,11 +1150,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0203157440_0203304640.wav",
    "avg_logprob": -0.149,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "念文化介绍"
   },
   {
    "id": "Q0083",
@@ -1110,11 +1165,11 @@
    "suggested_scenes": [
     "唱歌"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "粉丝夸她唱歌"
   },
   {
    "id": "Q0084",
@@ -1123,11 +1178,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0291905280_0292045760.wav",
    "avg_logprob": -0.144,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "公主城堡玩梗 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0085",
@@ -1136,11 +1191,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0180161920_0180252800.wav",
    "avg_logprob": -0.143,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "平淡"
   },
   {
    "id": "Q0086",
@@ -1149,11 +1204,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0163162560_0163264000.wav",
    "avg_logprob": -0.142,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "护手霜日常 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0087",
@@ -1162,11 +1217,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0318507200_0318619200.wav",
    "avg_logprob": -0.142,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0088",
@@ -1175,11 +1230,11 @@
    "source": "BV1BvGwznEg6_[眞白花音_Official] 谢谢200w粉丝！！！！！！！ 7月8号_晚 【直播回放】_(Vocals)__0050945920_0051084800.wav",
    "avg_logprob": -0.142,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "三次元暧昧/非她人设"
   },
   {
    "id": "Q0089",
@@ -1188,11 +1243,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0229040320_0229216320.wav",
    "avg_logprob": -0.14,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "过长怪名"
   },
   {
    "id": "Q0090",
@@ -1201,11 +1256,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0146612160_0146743040.wav",
    "avg_logprob": -0.139,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "大鸡压缩 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0091",
@@ -1214,11 +1269,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0272506560_0272687360.wav",
    "avg_logprob": -0.139,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0092",
@@ -1227,11 +1282,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0117223680_0117374720.wav",
    "avg_logprob": -0.138,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "过长"
   },
   {
    "id": "Q0093",
@@ -1242,11 +1297,11 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "抽烟场景"
   },
   {
    "id": "Q0094",
@@ -1255,11 +1310,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0099562560_0099680000.wav",
    "avg_logprob": -0.136,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0095",
@@ -1270,11 +1325,13 @@
    "suggested_scenes": [
     "情绪"
    ],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "杯面唐吉诃德"
   },
   {
    "id": "Q0096",
@@ -1283,11 +1340,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0168757440_0168915520.wav",
    "avg_logprob": -0.135,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "旁白收尾"
   },
   {
    "id": "Q0097",
@@ -1296,11 +1353,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0179978240_0180161920.wav",
    "avg_logprob": -0.133,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "酒单"
   },
   {
    "id": "Q0098",
@@ -1309,11 +1366,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0297070720_0297174400.wav",
    "avg_logprob": -0.132,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0099",
@@ -1324,11 +1381,11 @@
    "suggested_scenes": [
     "感谢"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "粉丝煽情"
   },
   {
    "id": "Q0100",
@@ -1337,11 +1394,11 @@
    "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点34分_(Vocals)__0093588480_0093696640.wav",
    "avg_logprob": -0.127,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "残句不完整"
   },
   {
    "id": "Q0101",
@@ -1350,11 +1407,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0211939520_0212034240.wav",
    "avg_logprob": -0.125,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0102",
@@ -1365,11 +1422,11 @@
    "suggested_scenes": [
     "情绪"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0103",
@@ -1378,11 +1435,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0284786880_0284882560.wav",
    "avg_logprob": -0.124,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "ASR 怪"
   },
   {
    "id": "Q0104",
@@ -1391,11 +1448,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0117804160_0117906560.wav",
    "avg_logprob": -0.123,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0105",
@@ -1404,11 +1461,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0121616640_0121703360.wav",
    "avg_logprob": -0.123,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0106",
@@ -1417,11 +1474,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0170156800_0170256000.wav",
    "avg_logprob": -0.123,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "旁白"
   },
   {
    "id": "Q0107",
@@ -1430,11 +1487,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0179863680_0179978240.wav",
    "avg_logprob": -0.121,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "酒"
   },
   {
    "id": "Q0108",
@@ -1443,11 +1500,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0111375040_0111482240.wav",
    "avg_logprob": -0.119,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "前台是机器人吗 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0109",
@@ -1456,11 +1513,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0111215680_0111312960.wav",
    "avg_logprob": -0.119,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0110",
@@ -1469,11 +1526,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0078205760_0078298560.wav",
    "avg_logprob": -0.118,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "勺子发现 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0111",
@@ -1482,11 +1539,13 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0212348800_0212469120.wav",
    "avg_logprob": -0.118,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "用不完自嘲"
   },
   {
    "id": "Q0112",
@@ -1495,11 +1554,11 @@
    "source": "BV1WQ9YBNEAp_[眞白花音_Official] 谢谢大家_再见了白菜！！  4月30号【直播回放】_(Vocals)__0214551680_0214655360.wav",
    "avg_logprob": -0.118,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "粉丝嘱托"
   },
   {
    "id": "Q0113",
@@ -1508,11 +1567,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0088982080_0089080320.wav",
    "avg_logprob": -0.116,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0114",
@@ -1521,11 +1580,11 @@
    "source": "BV1veWizuEpT_[眞白花音_录播]2025-10-16_白菜来啦_(Vocals)__0125107520_0125223360.wav",
    "avg_logprob": -0.116,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "ASR 严重错乱"
   },
   {
    "id": "Q0115",
@@ -1534,11 +1593,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0231734720_0231868160.wav",
    "avg_logprob": -0.114,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0116",
@@ -1549,11 +1608,13 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "巨无霸优先"
   },
   {
    "id": "Q0117",
@@ -1562,11 +1623,11 @@
    "source": "BV1j5D9BgE1a_【眞白花音】2026_04_12 日 17_19 白菜来啦_(Vocals)__0318006400_0318101120.wav",
    "avg_logprob": -0.113,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "游戏 UI/说明"
   },
   {
    "id": "Q0118",
@@ -1575,11 +1636,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0078431040_0078545920.wav",
    "avg_logprob": -0.112,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "ASR 怪"
   },
   {
    "id": "Q0119",
@@ -1588,11 +1649,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0096582720_0096695360.wav",
    "avg_logprob": -0.112,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0120",
@@ -1603,11 +1664,13 @@
    "suggested_scenes": [
     "食物"
    ],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "不是魔术师慢慢吃"
   },
   {
    "id": "Q0121",
@@ -1616,11 +1679,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0305646400_0305752640.wav",
    "avg_logprob": -0.098,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "糖分够了找盐 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0122",
@@ -1631,11 +1694,11 @@
    "suggested_scenes": [
     "问候"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "旁白"
   },
   {
    "id": "Q0123",
@@ -1644,11 +1707,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0177293120_0177396800.wav",
    "avg_logprob": -0.094,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0124",
@@ -1657,11 +1720,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0136644480_0136753280.wav",
    "avg_logprob": -0.093,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "残句"
   },
   {
    "id": "Q0125",
@@ -1672,11 +1735,11 @@
    "suggested_scenes": [
     "感谢"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "粉丝告别腔"
   },
   {
    "id": "Q0126",
@@ -1685,11 +1748,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0304426880_0304596160.wav",
    "avg_logprob": -0.09,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0127",
@@ -1698,11 +1761,11 @@
    "source": "BV1EWdfBTELB_【眞白花音】2026_04_19 日 21_10 白菜来啦_(Vocals)_model_bs_roformer_ep_317_sdr_12__0062431680_0062539200.wav",
    "avg_logprob": -0.088,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "いいと思います 轻肯定 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0128",
@@ -1714,11 +1777,11 @@
     "问候",
     "游戏"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "场景标签误导/一般"
   },
   {
    "id": "Q0129",
@@ -1727,11 +1790,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0209901120_0210010880.wav",
    "avg_logprob": -0.085,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "旁白"
   },
   {
    "id": "Q0130",
@@ -1740,11 +1803,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0293605440_0293781120.wav",
    "avg_logprob": -0.084,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "过长"
   },
   {
    "id": "Q0131",
@@ -1753,11 +1816,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0202899840_0203004800.wav",
    "avg_logprob": -0.083,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "文化介绍"
   },
   {
    "id": "Q0132",
@@ -1766,11 +1829,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0086143680_0086250880.wav",
    "avg_logprob": -0.078,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0133",
@@ -1779,11 +1842,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0284347840_0284508480.wav",
    "avg_logprob": -0.078,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "暴力历史不宜"
   },
   {
    "id": "Q0134",
@@ -1792,11 +1855,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0108163520_0108265600.wav",
    "avg_logprob": -0.076,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "味噌乌冬 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0135",
@@ -1805,11 +1868,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0165674880_0165789760.wav",
    "avg_logprob": -0.075,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "加烈酒抗辣 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0136",
@@ -1818,11 +1881,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0320900160_0321000960.wav",
    "avg_logprob": -0.074,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "单人票意外 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0137",
@@ -1831,11 +1894,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0151622400_0151785600.wav",
    "avg_logprob": -0.073,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "过长味觉"
   },
   {
    "id": "Q0138",
@@ -1844,11 +1907,14 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0315294080_0315414080.wav",
    "avg_logprob": -0.072,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "approved",
    "final_text": "",
-   "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "scenes": [
+    "屑",
+    "惊讶"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "儿童区太认真屑吐槽"
   },
   {
    "id": "Q0139",
@@ -1857,11 +1923,11 @@
    "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)__0088393600_0088517760.wav",
    "avg_logprob": -0.067,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0140",
@@ -1872,11 +1938,11 @@
    "suggested_scenes": [
     "情绪"
    ],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
-   "era_tag": "late",
-   "reviewer_note": ""
+   "era_tag": "peak",
+   "reviewer_note": "恐怖项目描述 | 二轮收紧：保留更高信噪"
   },
   {
    "id": "Q0141",
@@ -1885,11 +1951,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0137838720_0138012800.wav",
    "avg_logprob": -0.057,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "过长冷知识"
   },
   {
    "id": "Q0142",
@@ -1898,11 +1964,11 @@
    "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)__0132446080_0132526400.wav",
    "avg_logprob": -0.055,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "一般"
   },
   {
    "id": "Q0143",
@@ -1911,11 +1977,11 @@
    "source": "BV1WQ9YBNEAp_[眞白花音_Official] 谢谢大家_再见了白菜！！  4月30号【直播回放】_(Vocals)__0214667200_0214886720.wav",
    "avg_logprob": -0.052,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "粉丝发言"
   },
   {
    "id": "Q0144",
@@ -1924,11 +1990,11 @@
    "source": "BV1veWizuEpT_[眞白花音_录播]2025-10-16_白菜来啦_(Vocals)__0160429760_0160527040.wav",
    "avg_logprob": -0.042,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "歌词"
   },
   {
    "id": "Q0145",
@@ -1937,11 +2003,11 @@
    "source": "BV1pFUNBBETY_【直播回放】菜鸟直播第1512期_(Vocals)__0193457280_0193541440.wav",
    "avg_logprob": -0.19108072792490324,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "英游台词"
   },
   {
    "id": "Q0146",
@@ -1950,11 +2016,11 @@
    "source": "BV1pFUNBBETY_【直播回放】菜鸟直播第1512期_(Vocals)__0392510720_0392598400.wav",
    "avg_logprob": -0.18977864583333334,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "unknown",
-   "reviewer_note": ""
+   "reviewer_note": "游戏 UI"
   },
   {
    "id": "Q0147",
@@ -1963,11 +2029,11 @@
    "source": "BV1j5D9BgE1a_【眞白花音】2026_04_12 日 17_19 白菜来啦_(Vocals)__0414692160_0414743040.wav",
    "avg_logprob": -0.15299479166666666,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "游戏 UI"
   },
   {
    "id": "Q0148",
@@ -1976,11 +2042,1353 @@
    "source": "BV1ySxZzsEdj_【直播回放】【眞白花音_Official】白菜来啦 2025年10月07日21点00分_(Vocals)__0205781440_0205860480.wav",
    "avg_logprob": -0.17639160342514515,
    "suggested_scenes": [],
-   "status": "pending",
+   "status": "rejected",
    "final_text": "",
    "scenes": [],
    "era_tag": "late",
-   "reviewer_note": ""
+   "reviewer_note": "歌词"
+  },
+  {
+   "id": "Q0149",
+   "text": "对啊 下个星期的时候我也想开播呀",
+   "lang": "zh",
+   "source": "BV1odYMzXEj4_【直播回放】【眞白花音_Official】今天怎么样 2025年09月06日21点13分_(Vocals)",
+   "avg_logprob": -0.3,
+   "suggested_scenes": [
+    "问候"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "问候"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "想开播元气"
+  },
+  {
+   "id": "Q0150",
+   "text": "我打算开播和大家聊天",
+   "lang": "zh",
+   "source": "BV1xSdLB8Edw_【眞白花音】2026_04_17 五 21_01 白菜来啦_(Vocals)",
+   "avg_logprob": -0.316,
+   "suggested_scenes": [
+    "问候"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "问候"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "开播聊天"
+  },
+  {
+   "id": "Q0151",
+   "text": "大概两个小时左右和大家聊天",
+   "lang": "zh",
+   "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)",
+   "avg_logprob": -0.348,
+   "suggested_scenes": [
+    "问候"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "时长预告口语 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0152",
+   "text": "你们昨天几点睡觉呀",
+   "lang": "zh",
+   "source": "BV1BvGwznEg6_[眞白花音_Official] 谢谢200w粉丝！！！！！！！ 7月8号_(Vocals)",
+   "avg_logprob": -0.359,
+   "suggested_scenes": [
+    "问候"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "问候"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "互动问候"
+  },
+  {
+   "id": "Q0153",
+   "text": "后面可以开播的感觉",
+   "lang": "zh",
+   "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点_(Vocals)",
+   "avg_logprob": -0.22,
+   "suggested_scenes": [
+    "问候"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "开播期待 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0154",
+   "text": "おはようございます。寝てました。",
+   "lang": "ja",
+   "source": "extra-asr:ja-greeting",
+   "avg_logprob": -0.241,
+   "suggested_scenes": [
+    "问候"
+   ],
+   "status": "edited",
+   "final_text": "おはようございます、寝てました",
+   "scenes": [
+    "问候"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "日语早问候"
+  },
+  {
+   "id": "Q0155",
+   "text": "没有个性也有意思的哇 厉害",
+   "lang": "zh",
+   "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)",
+   "avg_logprob": -0.429,
+   "suggested_scenes": [
+    "夸赞"
+   ],
+   "status": "edited",
+   "final_text": "没有个性也有意思的，哇，厉害",
+   "scenes": [
+    "夸赞"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "回夸口语"
+  },
+  {
+   "id": "Q0156",
+   "text": "很厉害自己觉得自己太厉害了",
+   "lang": "zh",
+   "source": "BV1BvGwznEg6_[眞白花音_Official] 谢谢200w粉丝！！！！！！！ 7月8号_(Vocals)",
+   "avg_logprob": -0.441,
+   "suggested_scenes": [
+    "夸赞",
+    "屑"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "夸赞",
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "得意屑夸"
+  },
+  {
+   "id": "Q0157",
+   "text": "真的好听呀哈哈哈",
+   "lang": "zh",
+   "source": "BV1ySxZzsEdj_【直播回放】【眞白花音_Official】白菜来啦 2025年10月07日21点00分_(Vocals)",
+   "avg_logprob": -0.379,
+   "suggested_scenes": [
+    "夸赞",
+    "唱歌"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "夸赞",
+    "唱歌"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "好听+笑"
+  },
+  {
+   "id": "Q0158",
+   "text": "太好听了谢谢大家",
+   "lang": "zh",
+   "source": "BV1ySxZzsEdj_【直播回放】【眞白花音_Official】白菜来啦 2025年10月07日21点00分_(Vocals)",
+   "avg_logprob": -0.423,
+   "suggested_scenes": [
+    "夸赞",
+    "感谢"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "夸赞",
+    "感谢"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "夸+谢"
+  },
+  {
+   "id": "Q0159",
+   "text": "所以太难了哈哈哈",
+   "lang": "zh",
+   "source": "BV1ySxZzsEdj_【直播回放】【眞白花音_Official】白菜来啦 2025年10月07日21点00分_(Vocals)",
+   "avg_logprob": -0.377,
+   "suggested_scenes": [
+    "自嘲"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "难+笑"
+  },
+  {
+   "id": "Q0160",
+   "text": "真的没有呀对不起对不起",
+   "lang": "zh",
+   "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)",
+   "avg_logprob": -0.33,
+   "suggested_scenes": [
+    "自嘲"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "连声对不起"
+  },
+  {
+   "id": "Q0161",
+   "text": "呀呀呀对不起对不起我最强",
+   "lang": "zh",
+   "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)",
+   "avg_logprob": -0.419,
+   "suggested_scenes": [
+    "自嘲",
+    "屑"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲",
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "对不起+我最强屑"
+  },
+  {
+   "id": "Q0162",
+   "text": "那么对不起大家就蹲了",
+   "lang": "zh",
+   "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)",
+   "avg_logprob": -0.358,
+   "suggested_scenes": [
+    "自嘲"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "对不起蹲了"
+  },
+  {
+   "id": "Q0163",
+   "text": "你想输了吧对不起我输了",
+   "lang": "zh",
+   "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)",
+   "avg_logprob": -0.358,
+   "suggested_scenes": [
+    "自嘲",
+    "游戏"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲",
+    "游戏"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "认输"
+  },
+  {
+   "id": "Q0164",
+   "text": "大家明白吗?我真的没有失败啦你明白吗?",
+   "lang": "zh",
+   "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点_(Vocals)",
+   "avg_logprob": -0.393,
+   "suggested_scenes": [
+    "自嘲",
+    "屑"
+   ],
+   "status": "edited",
+   "final_text": "大家明白吗？我真的没有失败啦，你明白吗？",
+   "scenes": [
+    "自嘲",
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "嘴硬自嘲"
+  },
+  {
+   "id": "Q0165",
+   "text": "我太简单了哦非常非常简单嗯",
+   "lang": "zh",
+   "source": "BV1Z29sBiEZc_[眞白花音_Official] 白菜来啦  4月29号【直播回放】_(Vocals)",
+   "avg_logprob": -0.392,
+   "suggested_scenes": [
+    "自嘲"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "自嘲简单 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0166",
+   "text": "哈哈哈自己也不太明白的",
+   "lang": "zh",
+   "source": "BV1xSdLB8Edw_【眞白花音】2026_04_17 五 21_01 白菜来啦_(Vocals)",
+   "avg_logprob": -0.385,
+   "suggested_scenes": [
+    "自嘲"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "自己也不明白"
+  },
+  {
+   "id": "Q0167",
+   "text": "聊天也紧张的嗯那个现在我我的中文也",
+   "lang": "zh",
+   "source": "BV1EWdfBTELB_【眞白花音】2026_04_19 日 21_10 白菜来啦_(Vocals)",
+   "avg_logprob": -0.353,
+   "suggested_scenes": [
+    "自嘲"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "中文紧张自嘲 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0168",
+   "text": "我真的不太明白",
+   "lang": "zh",
+   "source": "BV18ro9BVEQJ_【眞白花音】2026_04_25 六 20_18 白菜来啦_(Vocals)",
+   "avg_logprob": -0.351,
+   "suggested_scenes": [
+    "自嘲"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "不太明白"
+  },
+  {
+   "id": "Q0169",
+   "text": "啊,对对对,对不起对不起,没有画面吧",
+   "lang": "zh",
+   "source": "BV1Z29sBiEZc_[眞白花音_Official] 白菜来啦  4月29号【直播回放】_(Vocals)",
+   "avg_logprob": -0.447,
+   "suggested_scenes": [
+    "自嘲"
+   ],
+   "status": "edited",
+   "final_text": "啊，对对对，对不起对不起，没有画面吧",
+   "scenes": [
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "技术事故道歉"
+  },
+  {
+   "id": "Q0170",
+   "text": "就现在我真的想吃冰淇淋",
+   "lang": "zh",
+   "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点_(Vocals)",
+   "avg_logprob": -0.277,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "想吃冰淇淋"
+  },
+  {
+   "id": "Q0171",
+   "text": "啊 今天也想吃冰淇淋的一天",
+   "lang": "zh",
+   "source": "BV1grQ3B1EMH_【眞白花音】2026_04_14 二 20_01 白菜来啦_(Vocals)",
+   "avg_logprob": -0.283,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "edited",
+   "final_text": "啊，今天也是想吃冰淇淋的一天",
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "冰淇淋日"
+  },
+  {
+   "id": "Q0172",
+   "text": "我真的想吃甜的东西",
+   "lang": "zh",
+   "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点_(Vocals)",
+   "avg_logprob": -0.316,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "想吃甜"
+  },
+  {
+   "id": "Q0173",
+   "text": "今天的晚饭非常好吃",
+   "lang": "zh",
+   "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点_(Vocals)",
+   "avg_logprob": -0.355,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "晚饭好吃"
+  },
+  {
+   "id": "Q0174",
+   "text": "想吃啊想吃呢大家想吃呢",
+   "lang": "zh",
+   "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点_(Vocals)",
+   "avg_logprob": -0.411,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "想吃互动"
+  },
+  {
+   "id": "Q0175",
+   "text": "全部都很好吃的很好吃的",
+   "lang": "zh",
+   "source": "BV1Z29sBiEZc_[眞白花音_Official] 白菜来啦  4月29号【直播回放】_(Vocals)",
+   "avg_logprob": -0.444,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "edited",
+   "final_text": "全部都很好吃的，很好吃的",
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "连说好吃"
+  },
+  {
+   "id": "Q0176",
+   "text": "怎么样想吃吗你想吃吗怎么样",
+   "lang": "zh",
+   "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点_(Vocals)",
+   "avg_logprob": -0.313,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "连环想吃 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0177",
+   "text": "好吃的 所以今天我吃了泡芙冰",
+   "lang": "zh",
+   "source": "BV1EWdfBTELB_【眞白花音】2026_04_19 日 21_10 白菜来啦_(Vocals)",
+   "avg_logprob": -0.325,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "泡芙冰 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0178",
+   "text": "冰淇淋非常好吃還有DQ的薄荷巧克力",
+   "lang": "zh",
+   "source": "BV1ZBQJBUEx2_【眞白花音】2026_04_15 三 20_03 白菜来啦_(Vocals)",
+   "avg_logprob": -0.23,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "edited",
+   "final_text": "冰淇淋非常好吃，还有 DQ 的薄荷巧克力",
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "冰淇淋+DQ"
+  },
+  {
+   "id": "Q0179",
+   "text": "奶茶啊真的想喝奶茶",
+   "lang": "zh",
+   "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点_(Vocals)",
+   "avg_logprob": -0.36,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "食物"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "奶茶"
+  },
+  {
+   "id": "Q0180",
+   "text": "日本的外賣真的貴 所以我平時真的不用",
+   "lang": "zh",
+   "source": "BV1Z29sBiEZc_[眞白花音_Official] 白菜来啦  4月29号【直播回放】_(Vocals)",
+   "avg_logprob": -0.393,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "外卖贵 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0181",
+   "text": "来ました!名物の豚角煮です",
+   "lang": "ja",
+   "source": "extra-asr:ja-food",
+   "avg_logprob": -0.242,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "名物到货 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0182",
+   "text": "うどんうどんですうどんを食べます",
+   "lang": "ja",
+   "source": "extra-asr:ja-food",
+   "avg_logprob": -0.237,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "乌冬连呼 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0183",
+   "text": "これは外さない味です",
+   "lang": "ja",
+   "source": "extra-asr:ja-food",
+   "avg_logprob": -0.241,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "稳的味道 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0184",
+   "text": "マジで好き水やサイダーが一番好きかも",
+   "lang": "ja",
+   "source": "extra-asr:ja-food",
+   "avg_logprob": -0.216,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "水/汽水最爱 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0185",
+   "text": "ただこれ、これたこ焼きだよね。絶対熱い。大丈夫かな、私の猫舌。",
+   "lang": "ja",
+   "source": "extra-asr:ja-food",
+   "avg_logprob": -0.22,
+   "suggested_scenes": [
+    "食物"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "猫舌たこ焼き | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0186",
+   "text": "对啊 靠下 打了靠下的话 我们赢了吧",
+   "lang": "zh",
+   "source": "BV1grQ3B1EMH_【眞白花音】2026_04_14 二 20_01 白菜来啦_(Vocals)",
+   "avg_logprob": -0.4,
+   "suggested_scenes": [
+    "游戏"
+   ],
+   "status": "edited",
+   "final_text": "对啊，靠下，打了靠下的话我们赢了吧",
+   "scenes": [
+    "游戏"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "游戏指挥菜感"
+  },
+  {
+   "id": "Q0187",
+   "text": "休息吧 你们做什么你们做什么 玩游戏吗",
+   "lang": "zh",
+   "source": "BV1WQ9YBNEAp_[眞白花音_Official] 谢谢大家_再见了白菜！！  4月30号【直播回放】_(Vocals)",
+   "avg_logprob": -0.393,
+   "suggested_scenes": [
+    "游戏",
+    "问候"
+   ],
+   "status": "edited",
+   "final_text": "休息吧，你们做什么？玩游戏吗",
+   "scenes": [
+    "游戏",
+    "问候"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "问玩游戏"
+  },
+  {
+   "id": "Q0188",
+   "text": "日常很多网游戏非常好",
+   "lang": "zh",
+   "source": "BV1zaoxB1EYQ_【眞白花音】2026_04_22 三 21_01 白菜来啦_(Vocals)",
+   "avg_logprob": -0.347,
+   "suggested_scenes": [
+    "游戏"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "网游好 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0189",
+   "text": "我感觉不玩也可以呀",
+   "lang": "zh",
+   "source": "BV1WQ9YBNEAp_[眞白花音_Official] 谢谢大家_再见了白菜！！  4月30号【直播回放】_(Vocals)",
+   "avg_logprob": -0.387,
+   "suggested_scenes": [
+    "游戏"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "不玩也可以 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0190",
+   "text": "小朋友,我已经滑了,不能玩了。",
+   "lang": "zh",
+   "source": "BV1q7Ygz4EUx_弹幕版[眞白花音_录播] 今天怎么样 2025年09月07日_(Vocals)",
+   "avg_logprob": -0.362,
+   "suggested_scenes": [
+    "游戏",
+    "自嘲"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "滑了不能玩 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0191",
+   "text": "卡电给我跑死",
+   "lang": "zh",
+   "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)",
+   "avg_logprob": -0.34,
+   "suggested_scenes": [
+    "游戏"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "卡顿吐槽 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0192",
+   "text": "やばいこれ戻したい戻したい待ってやばいやっちゃった",
+   "lang": "ja",
+   "source": "extra-asr:ja-game",
+   "avg_logprob": -0.254,
+   "suggested_scenes": [
+    "游戏",
+    "惊讶"
+   ],
+   "status": "edited",
+   "final_text": "やばい、これ戻したい戻したい、待ってやばい、やっちゃった",
+   "scenes": [
+    "游戏",
+    "惊讶"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "操作失误慌"
+  },
+  {
+   "id": "Q0193",
+   "text": "力を使うのちょっとずるいですよねチートです",
+   "lang": "ja",
+   "source": "extra-asr:ja-game",
+   "avg_logprob": -0.215,
+   "suggested_scenes": [
+    "游戏",
+    "屑"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "用力量是作弊 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0194",
+   "text": "这个歌曲真的好久没唱了",
+   "lang": "zh",
+   "source": "BV1ySxZzsEdj_【直播回放】【眞白花音_Official】白菜来啦 2025年10月07日21点00分_(Vocals)",
+   "avg_logprob": -0.379,
+   "suggested_scenes": [
+    "唱歌"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "唱歌"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "好久没唱"
+  },
+  {
+   "id": "Q0195",
+   "text": "這首歌不會唱沒關係",
+   "lang": "zh",
+   "source": "BV1Pb3RzGEak_[眞白花音_Official] 白菜来啦！ 7月4号 【直播回放】_(Vocals)",
+   "avg_logprob": -0.328,
+   "suggested_scenes": [
+    "唱歌",
+    "自嘲"
+   ],
+   "status": "edited",
+   "final_text": "这首歌不会唱没关系",
+   "scenes": [
+    "唱歌",
+    "自嘲"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "不会唱没关系"
+  },
+  {
+   "id": "Q0196",
+   "text": "呀今天也我们很多唱歌了",
+   "lang": "zh",
+   "source": "BV1ySxZzsEdj_【直播回放】【眞白花音_Official】白菜来啦 2025年10月07日21点00分_(Vocals)",
+   "avg_logprob": -0.429,
+   "suggested_scenes": [
+    "唱歌"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "唱很多 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0197",
+   "text": "我下次唱歌",
+   "lang": "zh",
+   "source": "BV18ro9BVEQJ_【眞白花音】2026_04_25 六 20_18 白菜来啦_(Vocals)",
+   "avg_logprob": -0.395,
+   "suggested_scenes": [
+    "唱歌"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "下次唱歌 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0198",
+   "text": "所以不能唱歌的话",
+   "lang": "zh",
+   "source": "BV1Pb3RzGEak_[眞白花音_Official] 白菜来啦！ 7月4号 【直播回放】_(Vocals)",
+   "avg_logprob": -0.374,
+   "suggested_scenes": [
+    "唱歌"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "不能唱歌 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0199",
+   "text": "播放了感谢大家",
+   "lang": "zh",
+   "source": "BV1veWizuEpT_[眞白花音_录播]2025-10-16_白菜来啦_(Vocals)",
+   "avg_logprob": -0.406,
+   "suggested_scenes": [
+    "感谢"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "感谢大家 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0200",
+   "text": "我很多看了谢谢大家",
+   "lang": "zh",
+   "source": "BV1EWdfBTELB_【眞白花音】2026_04_19 日 21_10 白菜来啦_(Vocals)",
+   "avg_logprob": -0.361,
+   "suggested_scenes": [
+    "感谢"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "看了谢谢 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0201",
+   "text": "阿尼嘎多又是什么意思谢谢谢谢",
+   "lang": "zh",
+   "source": "BV14qDyBYEDy_【眞白花音】2026_04_11 六 20_47 白菜来啦_(Vocals)",
+   "avg_logprob": -0.445,
+   "suggested_scenes": [
+    "感谢"
+   ],
+   "status": "edited",
+   "final_text": "阿里嘎多又是什么意思？谢谢谢谢",
+   "scenes": [
+    "感谢"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "修阿里嘎多错字"
+  },
+  {
+   "id": "Q0202",
+   "text": "两个小时已经很久了真的吗",
+   "lang": "zh",
+   "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)",
+   "avg_logprob": -0.411,
+   "suggested_scenes": [
+    "惊讶"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "惊讶"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "真的吗"
+  },
+  {
+   "id": "Q0203",
+   "text": "很强的东西是什么",
+   "lang": "zh",
+   "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)",
+   "avg_logprob": -0.363,
+   "suggested_scenes": [
+    "惊讶"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "是什么 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0204",
+   "text": "原来日本也都这样啊",
+   "lang": "zh",
+   "source": "BV1veWizuEpT_[眞白花音_录播]2025-10-16_白菜来啦_(Vocals)",
+   "avg_logprob": -0.366,
+   "suggested_scenes": [
+    "惊讶"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "原来也这样 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0205",
+   "text": "为什么日本没有奶酱店",
+   "lang": "zh",
+   "source": "BV1Z29sBiEZc_[眞白花音_Official] 白菜来啦  4月29号【直播回放】_(Vocals)",
+   "avg_logprob": -0.355,
+   "suggested_scenes": [
+    "惊讶"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "奶酱→奶茶 ASR 修 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0206",
+   "text": "どこ?全然わからないんですけど",
+   "lang": "ja",
+   "source": "extra-asr:ja-surprise",
+   "avg_logprob": -0.243,
+   "suggested_scenes": [
+    "惊讶"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "完全不懂在哪 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0207",
+   "text": "突然傷状に宝箱が現れたんですけどこれ何?",
+   "lang": "ja",
+   "source": "extra-asr:ja-surprise",
+   "avg_logprob": -0.206,
+   "suggested_scenes": [
+    "惊讶",
+    "游戏"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "宝箱什么 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0208",
+   "text": "那我们一起看看笨蛋的进",
+   "lang": "zh",
+   "source": "BV1BvGwznEg6_[眞白花音_Official] 谢谢200w粉丝！！！！！！！ 7月8号_(Vocals)",
+   "avg_logprob": -0.358,
+   "suggested_scenes": [
+    "屑"
+   ],
+   "status": "edited",
+   "final_text": "那我们一起看看笨蛋的进展",
+   "scenes": [
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "笨蛋梗"
+  },
+  {
+   "id": "Q0209",
+   "text": "谁有结婚呀哈哈哈我和谁结婚嗯哈哈哈",
+   "lang": "zh",
+   "source": "BV1xSdLB8Edw_【眞白花音】2026_04_17 五 21_01 白菜来啦_(Vocals)",
+   "avg_logprob": -0.36,
+   "suggested_scenes": [
+    "屑"
+   ],
+   "status": "edited",
+   "final_text": "谁要结婚呀哈哈哈，我和谁结婚嗯哈哈哈",
+   "scenes": [
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "结婚屑笑"
+  },
+  {
+   "id": "Q0210",
+   "text": "我不洗澡對我真的不洗澡",
+   "lang": "zh",
+   "source": "BV1j5D9BgE1a_【眞白花音】2026_04_12 日 17_19 白菜来啦_(Vocals)",
+   "avg_logprob": -0.334,
+   "suggested_scenes": [
+    "屑"
+   ],
+   "status": "edited",
+   "final_text": "我不洗澡，对，我真的不洗澡",
+   "scenes": [
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "讨厌洗澡设定"
+  },
+  {
+   "id": "Q0211",
+   "text": "我们正经现在太正经了非常正经了",
+   "lang": "zh",
+   "source": "BV1YyaZznEvj_【直播回放】【眞白花音_Official】做饭 2025年09月08日19点_(Vocals)",
+   "avg_logprob": -0.397,
+   "suggested_scenes": [
+    "屑"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "太正经了屑"
+  },
+  {
+   "id": "Q0212",
+   "text": "ひとりごとだよ 恥ずかしいこと聞かないでよね",
+   "lang": "ja",
+   "source": "extra-asr:ja-xie",
+   "avg_logprob": -0.207,
+   "suggested_scenes": [
+    "屑"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "自言自语别听 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0213",
+   "text": "我做什么比较好",
+   "lang": "zh",
+   "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)",
+   "avg_logprob": -0.368,
+   "suggested_scenes": [
+    "情绪"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "做什么好 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0214",
+   "text": "哇 烦恼中 烦恼中做什么东西",
+   "lang": "zh",
+   "source": "BV1soH2zjEtA_【直播回放】【眞白花音_Official】白菜来了 2025年09月09日20点53分_(Vocals)",
+   "avg_logprob": -0.369,
+   "suggested_scenes": [
+    "情绪"
+   ],
+   "status": "edited",
+   "final_text": "哇，烦恼中，烦恼中，做什么东西",
+   "scenes": [
+    "情绪"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "烦恼中"
+  },
+  {
+   "id": "Q0215",
+   "text": "嗯我喜欢这个衣服呢",
+   "lang": "zh",
+   "source": "BV1BvGwznEg6_[眞白花音_Official] 谢谢200w粉丝！！！！！！！ 7月8号_(Vocals)",
+   "avg_logprob": -0.352,
+   "suggested_scenes": [
+    "情绪"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "喜欢衣服 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0216",
+   "text": "现在流鼻涕也太多了",
+   "lang": "zh",
+   "source": "BV1odYMzXEj4_【直播回放】【眞白花音_Official】今天怎么样 2025年09月06日21点13分_(Vocals)",
+   "avg_logprob": -0.291,
+   "suggested_scenes": [
+    "情绪"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "流鼻涕 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0217",
+   "text": "停不下來真的停不下來",
+   "lang": "zh",
+   "source": "BV1veQsBoEWd_眞白花音_Official-20260410-白菜来啦_(Vocals)",
+   "avg_logprob": -0.348,
+   "suggested_scenes": [
+    "情绪"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "停不下来 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0218",
+   "text": "可以啊 bw 的时候有要求的话",
+   "lang": "zh",
+   "source": "BV1Pb3RzGEak_[眞白花音_Official] 白菜来啦！ 7月4号 【直播回放】_(Vocals)",
+   "avg_logprob": -0.367,
+   "suggested_scenes": [
+    "情绪"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "BW 回应 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0219",
+   "text": "那么我们下次见大家",
+   "lang": "zh",
+   "source": "BV1EWdfBTELB_【眞白花音】2026_04_19 日 21_10 白菜来啦_(Vocals)",
+   "avg_logprob": -0.359,
+   "suggested_scenes": [
+    "告别"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "告别"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "日常下次见"
+  },
+  {
+   "id": "Q0220",
+   "text": "我想开播所以大家我们下次见",
+   "lang": "zh",
+   "source": "BV1odYMzXEj4_【直播回放】【眞白花音_Official】今天怎么样 2025年09月06日21点13分_(Vocals)",
+   "avg_logprob": -0.332,
+   "suggested_scenes": [
+    "告别",
+    "问候"
+   ],
+   "status": "edited",
+   "final_text": "我想开播，所以大家我们下次见",
+   "scenes": [
+    "告别",
+    "问候"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "下次见"
+  },
+  {
+   "id": "Q0221",
+   "text": "大概大家明天也我不能开播的所以请多多关照",
+   "lang": "zh",
+   "source": "BV1q7Ygz4EUx_弹幕版[眞白花音_录播] 今天怎么样 2025年09月07日_(Vocals)",
+   "avg_logprob": -0.27,
+   "suggested_scenes": [
+    "告别"
+   ],
+   "status": "rejected",
+   "final_text": "",
+   "scenes": [],
+   "era_tag": "peak",
+   "reviewer_note": "不能开播关照 | 二轮收紧：保留更高信噪"
+  },
+  {
+   "id": "Q0222",
+   "text": "早好音",
+   "lang": "zh",
+   "source": "research-verified:persona-research#口癖",
+   "avg_logprob": null,
+   "suggested_scenes": [
+    "问候"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "问候"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "公开固定问候"
+  },
+  {
+   "id": "Q0223",
+   "text": "辛苦音",
+   "lang": "zh",
+   "source": "research-verified:persona-research#口癖",
+   "avg_logprob": null,
+   "suggested_scenes": [
+    "问候"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "问候"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "公开固定问候"
+  },
+  {
+   "id": "Q0224",
+   "text": "蔬菜不是精灵能吃的东西",
+   "lang": "zh",
+   "source": "research-verified:persona-research#美食",
+   "avg_logprob": null,
+   "suggested_scenes": [
+    "食物",
+    "屑"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "食物",
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "公开偏好原话"
+  },
+  {
+   "id": "Q0225",
+   "text": "玩游戏又菜，唱歌又难听，谢谢你们的包容",
+   "lang": "zh",
+   "source": "research-verified:persona-research#自嘲",
+   "avg_logprob": null,
+   "suggested_scenes": [
+    "自嘲",
+    "游戏",
+    "唱歌"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲",
+    "游戏",
+    "唱歌"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "公开自嘲原话"
+  },
+  {
+   "id": "Q0226",
+   "text": "尼们现在是什么心情",
+   "lang": "zh",
+   "source": "research-verified:persona-research#口癖",
+   "avg_logprob": null,
+   "suggested_scenes": [
+    "屑"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "公开口癖；官方/本人语境"
+  },
+  {
+   "id": "Q0227",
+   "text": "这可是",
+   "lang": "zh",
+   "source": "research-verified:persona-research#口癖",
+   "avg_logprob": null,
+   "suggested_scenes": [
+    "屑"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "公开口癖碎片，场景屑"
+  },
+  {
+   "id": "Q0228",
+   "text": "三的七次方等于二十一",
+   "lang": "zh",
+   "source": "research-verified:persona-research#笨蛋人设",
+   "avg_logprob": null,
+   "suggested_scenes": [
+    "自嘲",
+    "屑"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲",
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "3^7=21 公开梗"
+  },
+  {
+   "id": "Q0229",
+   "text": "白菜三角的内角和是二百七十度",
+   "lang": "zh",
+   "source": "research-verified:persona-research#笨蛋人设",
+   "avg_logprob": null,
+   "suggested_scenes": [
+    "自嘲",
+    "屑"
+   ],
+   "status": "approved",
+   "final_text": "",
+   "scenes": [
+    "自嘲",
+    "屑"
+   ],
+   "era_tag": "peak",
+   "reviewer_note": "白菜三角公开梗"
   }
  ]
 }
