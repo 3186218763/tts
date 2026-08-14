@@ -30,6 +30,8 @@ cp configs/config.example.yaml configs/config.yaml
 # 编辑 configs/config.yaml：填入 DeepSeek API key、模型与 GPT-SoVITS 地址
 ```
 
+**TTS 满意配方（训练/选模/推理全参数）已锁定：** [`configs/huayin_precision.yaml`](configs/huayin_precision.yaml)
+
 ### 3. 启动 GPT-SoVITS TTS 服务
 
 ```bash
@@ -122,13 +124,18 @@ separate → slice → filter → speaker → asr → alignment → dataset
 | 阶段 | 脚本 | 输入 → 输出 | 职责 |
 |------|------|-------------|------|
 | 采集 | `bili_download.py` / `batch_download.py` | B 站 → `data/wav/` | B 站 API 下载、搜索筛选、断点续传 |
+| collect_plan | `build_collect_plan.py` | 搜索结果 → `data/collect_plan.json` | 中文优先分层（B 杂谈/中文 → A 切片 → C 长录播）与 shortfall 预估 |
+| plan 下载 | `batch_download.py --from-plan` | plan → `data/raw`/`wav` | 按优先级下载；可 `--append-training-assets` |
 | separate | `build_dataset.py --stage separate` / `run_parallel_separation.py` | `data/wav/` → `data/vocals/` | UVR5 BS-Roformer 人声分离，按白名单、长音频切块（默认 30 分钟）防内存溢出 |
 | slice | `build_dataset.py --stage slice` | `data/vocals/` → `data/slices/` | 按 RMS 静音切分为短句，逐 vocal 增量 |
 | filter | `build_dataset.py --stage filter` | `data/slices/` → `filter_results.json` | librosa `pyin` 音高特征：歌声（voiced_ratio / f0_cv / longest_voiced）、低能量、时长异常 |
 | speaker | `filter_speakers.py` | 切片 + 声纹参考 → `speaker_results.json` | ECAPA-TDNN 声纹打分，剔除非花音人声 |
 | asr | `build_dataset.py --stage asr` / `run_parallel_asr.py` | 保留切片 → `asr_results.json` | faster-whisper `large-v3` 增量转写 + 语种/置信度 |
 | alignment | `verify_asr_alignment.py` | ASR 结果 → `alignment_results.json` | 强制语种二次转写，`SequenceMatcher` 校验音文一致性 |
-| dataset | `build_dataset.py --stage dataset` | ASR + 对齐 → `data/dataset/` | 语种白名单（默认仅中日）、文本质量门、幻觉过滤，输出 `annotation.list` |
+| dataset | `build_dataset.py --stage dataset` | ASR + 对齐 → `data/dataset/` | 语种白名单（默认仅中日）、文本质量门、幻觉过滤，输出 `annotation.list`（对照集） |
+| scorecard | `build_quality_scorecard.py` | 各阶段 JSON → `quality_scorecard.json` | 硬门 + 0–100 软分记分卡 |
+| dataset_hq | `build_hq_dataset.py` | scorecard → `data/dataset_hq/` | ZH≥60% 配额出集、砍低质、单源 cap |
+| validate_hq | `validate_hq_dataset.py` | `dataset_hq` → 验证报告 + 人听清单 | V1–V8 自动门禁 + 分层人听导出 |
 
 一次全量重建：
 
@@ -153,11 +160,11 @@ python scripts/train_gpt_sovits.py \
   --gpus 0-1
 ```
 
-脚本在 GPT-SoVITS 仓库环境下无头执行 WebUI 1A/1B/1C 全流程。当前交付模型：
+脚本在 GPT-SoVITS 仓库环境下无头执行 WebUI 1A/1B/1C 全流程。当前交付模型（均在 `model/`）：
 
-- `model/huayin-e15.ckpt`：GPT 语义模型
-- `model/huayin_e8_s2536.pth`：SoVITS 声学模型
-- `model/huayin_ref.wav`：参考音频
+- `model/huayin-gpt.ckpt`：GPT 语义模型（`dataset_precision` 验证最优，val top3 acc 0.250）
+- `model/huayin-sovits.pth`：SoVITS 声学模型（precision 全量 12 epoch）
+- `model/huayin-ref.wav`：参考音频
 
 ## 脚本清单
 

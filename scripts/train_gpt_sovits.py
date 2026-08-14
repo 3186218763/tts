@@ -30,6 +30,8 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATASET_DIR = PROJECT_ROOT / "data" / "dataset"
 
+DRY_RUN = False
+
 
 def log(msg: str) -> None:
     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}", flush=True)
@@ -41,6 +43,9 @@ def run(cmd: list[str] | str, env: dict[str, str] | None = None, cwd: Path | Non
     else:
         pretty = cmd
     log(f"$ {pretty}")
+    if DRY_RUN:
+        log("[DRY-RUN] command skipped (simulation only)")
+        return
     merged = os.environ.copy()
     if env:
         merged.update({k: str(v) for k, v in env.items()})
@@ -82,6 +87,61 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--epochs-s1", type=int, default=15, help="GPT total epochs")
     p.add_argument("--save-every-s2", type=int, default=4)
     p.add_argument("--save-every-s1", type=int, default=1)
+    p.add_argument(
+        "--lr-decay-steps",
+        type=int,
+        default=None,
+        help="Override s1 optimizer decay_steps (e.g. 12000 for a continuation run)",
+    )
+    p.add_argument(
+        "--s1-warmup-steps",
+        type=int,
+        default=None,
+        help="Override s1 optimizer warmup_steps (default: config value 2000)",
+    )
+    p.add_argument(
+        "--lr-s1",
+        type=float,
+        default=None,
+        help="Override s1 optimizer peak lr (default: config value 0.01)",
+    )
+    p.add_argument(
+        "--s1-dev-frac",
+        type=float,
+        default=0.04,
+        help="S1 held-out dev fraction sampled from 6-name2semantic.tsv "
+        "(0 disables the dev set)",
+    )
+    p.add_argument(
+        "--s1-val-batches",
+        type=int,
+        default=40,
+        help="S1 validation batches per epoch (also caps dev dataset size)",
+    )
+    p.add_argument(
+        "--s1-dropout",
+        type=float,
+        default=None,
+        help="Override S1 model.dropout (token embedding dropout; default from yaml is 0)",
+    )
+    p.add_argument(
+        "--s1-early-stop-patience",
+        type=int,
+        default=0,
+        help="S1 EarlyStopping patience on val_top_3_acc (0 disables; requires --s1-dev-frac > 0)",
+    )
+    p.add_argument(
+        "--s1-early-stop-min-delta",
+        type=float,
+        default=0.001,
+        help="S1 EarlyStopping min_delta for val_top_3_acc",
+    )
+    p.add_argument(
+        "--s2-dropout",
+        type=float,
+        default=None,
+        help="Override S2 model.p_dropout (v2Pro default is 0.0)",
+    )
     p.add_argument("--text-low-lr-rate", type=float, default=0.4)
     p.add_argument("--skip-format", action="store_true", help="Skip 1A/1B/1C if already done")
     p.add_argument("--skip-1a", action="store_true", help="Skip only 1A text feature step")
@@ -89,8 +149,52 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--skip-1c", action="store_true", help="Skip only 1C semantic step")
     p.add_argument("--skip-s2", action="store_true", help="Skip SoVITS training")
     p.add_argument("--skip-s1", action="store_true", help="Skip GPT training")
+    p.add_argument(
+        "--init-s1",
+        type=Path,
+        default=None,
+        help="GPT (s1) init weights, e.g. model/huayin-gpt.ckpt; default = official pretrained",
+    )
+    p.add_argument(
+        "--init-s2g",
+        type=Path,
+        default=None,
+        help="SoVITS generator (s2G) init weights, e.g. model/huayin-sovits.pth; "
+        "default = official pretrained",
+    )
     p.add_argument("--is-half", default="True", choices=["True", "False"])
+    p.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Simulate the full pipeline: check prerequisites, print every stage and command, launch nothing",
+    )
     return p.parse_args()
+
+
+def dry_run_checks(args: argparse.Namespace, exp_dir: Path, root: Path) -> bool:
+    checks: list[tuple[str, bool, str]] = [
+        ("annotation.list", args.list_path.is_file(), str(args.list_path)),
+    ]
+    entries = 0
+    if args.list_path.is_file():
+        entries = sum(1 for line in args.list_path.read_text(encoding="utf-8").splitlines() if line.strip())
+    checks.append(("list entries", entries > 0, f"{entries} lines"))
+    checks.append(("wav dir", args.wav_dir.is_dir(), str(args.wav_dir)))
+    if args.list_path.is_file() and args.wav_dir.is_dir():
+        first = args.list_path.read_text(encoding="utf-8").splitlines()[0].split("|")[0]
+        sample = args.wav_dir / Path(first).name
+        checks.append(("first wav", sample.is_file(), str(sample)))
+    pretrained = root / "GPT_SoVITS" / "pretrained_models"
+    for name in ("s1v3.ckpt", "s2G488k.pth", "s2D488k.pth"):
+        p = pretrained / name
+        checks.append((f"pretrained {name}", p.is_file(), str(p)))
+    hubert = pretrained / "chinese-hubert-base" / "pytorch_model.bin"
+    checks.append(("hubert model", hubert.is_file(), str(hubert)))
+    all_ok = True
+    for label, ok, msg in checks:
+        log(f"[DRY-RUN] check {label}: {'OK' if ok else 'FAIL'} {msg}")
+        all_ok = all_ok and ok
+    return all_ok
 
 
 def gpu_list(gpus: str) -> list[str]:
@@ -333,6 +437,9 @@ def train_s2(root: Path, py: str, args: argparse.Namespace, exp_dir: Path, tmp_d
             "v2ProPlus": "GPT_SoVITS/pretrained_models/v2Pro/s2Gv2ProPlus.pth",
         }[args.version]
         s2d = s2g.replace("s2G", "s2D")
+        if args.init_s2g is not None:
+            s2g = str(args.init_s2g.resolve())
+            log(f"S2 init: loading previous model weights from {s2g}")
         weight_dir = f"SoVITS_weights_{args.version}"
     elif args.version == "v2":
         config_file = root / "GPT_SoVITS/configs/s2.json"
@@ -361,6 +468,9 @@ def train_s2(root: Path, py: str, args: argparse.Namespace, exp_dir: Path, tmp_d
     data["train"]["grad_ckpt"] = False
     data["train"]["lora_rank"] = 32
     data["model"]["version"] = args.version
+    if args.s2_dropout is not None:
+        data["model"]["p_dropout"] = float(args.s2_dropout)
+        log(f"SoVITS p_dropout overridden to {args.s2_dropout}")
     data["data"]["exp_dir"] = str(exp_dir)
     data["s2_ckpt_dir"] = str(exp_dir)
     data["save_weight_dir"] = weight_dir
@@ -407,21 +517,77 @@ def train_s1(root: Path, py: str, args: argparse.Namespace, exp_dir: Path, tmp_d
 
     data["train"]["batch_size"] = args.batch_size_s1
     data["train"]["epochs"] = args.epochs_s1
+    if args.lr_decay_steps is not None:
+        data["optimizer"]["decay_steps"] = args.lr_decay_steps
+        log(f"GPT lr: decay_steps overridden to {args.lr_decay_steps}")
+    if args.s1_warmup_steps is not None:
+        data["optimizer"]["warmup_steps"] = args.s1_warmup_steps
+        log(f"GPT lr: warmup_steps overridden to {args.s1_warmup_steps}")
+    if args.lr_s1 is not None:
+        data["optimizer"]["lr"] = args.lr_s1
+        log(f"GPT lr: peak lr overridden to {args.lr_s1}")
+    if args.s1_dropout is not None:
+        data.setdefault("model", {})
+        data["model"]["dropout"] = float(args.s1_dropout)
+        log(f"GPT model.dropout overridden to {args.s1_dropout}")
+    data["train"]["early_stop_patience"] = int(args.s1_early_stop_patience)
+    data["train"]["early_stop_min_delta"] = float(args.s1_early_stop_min_delta)
+    if args.s1_early_stop_patience > 0 and args.s1_dev_frac <= 0:
+        log("WARN: early stop patience > 0 but s1_dev_frac=0; EarlyStopping will be disabled")
+    elif args.s1_early_stop_patience > 0:
+        log(
+            f"GPT EarlyStopping: patience={args.s1_early_stop_patience} "
+            f"min_delta={args.s1_early_stop_min_delta} monitor=val_top_3_acc"
+        )
+    # init_s1 seeds the resume directory (s1_train picks it up via ckpt_path);
+    # pretrained_s1 stays official so model init loading succeeds.
     data["pretrained_s1"] = pretrained_s1
     data["train"]["save_every_n_epoch"] = args.save_every_s1
     data["train"]["if_save_every_weights"] = True
+    # Keep all epoch half-weights for post-hoc selection; lightning ckpt still
+    # cleaned when if_save_latest=True (saves disk under logs_s1_*/ckpt).
     data["train"]["if_save_latest"] = True
     data["train"]["if_dpo"] = False
     data["train"]["half_weights_save_dir"] = weight_dir
     data["train"]["exp_name"] = args.exp_name
+    data["init_s1"] = str(args.init_s1.resolve()) if args.init_s1 else None
     data["train_semantic_path"] = str(exp_dir / "6-name2semantic.tsv")
     data["train_phoneme_path"] = str(exp_dir / "2-name2text.txt")
+    if args.s1_dev_frac > 0:
+        log(f"GPT dev: split {args.s1_dev_frac:.1%} held-out dev set")
+        run(
+            [
+                py,
+                "-s",
+                str(PROJECT_ROOT / "scripts" / "make_s1_dev_split.py"),
+                "--exp-dir",
+                str(exp_dir),
+                "--frac",
+                str(args.s1_dev_frac),
+                "--seed",
+                "1234",
+            ],
+            cwd=root,
+        )
+        data["dev_semantic_path"] = str(exp_dir / "6-name2semantic.dev.tsv")
+        data["dev_phoneme_path"] = str(exp_dir / "2-name2text.dev.txt")
+        data["train_semantic_path"] = str(exp_dir / "6-name2semantic.train.tsv")
+        data["train_phoneme_path"] = str(exp_dir / "2-name2text.train.txt")
+        data["data"]["limit_val_batches"] = args.s1_val_batches
+        # keep the dev dataset >=100 samples so Text2SemanticDataset does not
+        # auto-duplicate it (its init_batch pads datasets smaller than 100).
+        data["data"]["max_eval_sample"] = max(100, args.s1_val_batches)
     data["output_dir"] = str(exp_dir / f"logs_s1_{args.version}")
 
     tmp_cfg = tmp_dir / "tmp_s1.yaml"
     tmp_cfg.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False), encoding="utf-8")
 
     s1_ckpt_dir = exp_dir / f"logs_s1_{args.version}" / "ckpt"
+    s1_ckpt_dir.mkdir(parents=True, exist_ok=True)
+    if args.init_s1 is not None and not args.init_s1.resolve().is_file():
+        raise SystemExit(f"init_s1 not found: {args.init_s1.resolve()}")
+    if args.init_s1 is not None:
+        log(f"S1 init: will load weights from {args.init_s1.resolve()}")
     s1_checkpoints = sorted(s1_ckpt_dir.glob("epoch=*-step=*.ckpt"))
     if s1_checkpoints:
         log(f"GPT resume: using newest checkpoint {s1_checkpoints[-1]}")
@@ -467,7 +633,9 @@ def setup_pythonpath(root: Path) -> None:
 
 
 def main() -> int:
+    global DRY_RUN
     args = parse_args()
+    DRY_RUN = args.dry_run
     root = args.sovits_root.resolve()
     if not root.exists():
         raise SystemExit(f"GPT-SoVITS root not found: {root}")
@@ -490,7 +658,24 @@ def main() -> int:
     if not args.wav_dir.is_dir():
         raise SystemExit(f"wav dir missing: {args.wav_dir}")
 
-    if args.skip_format:
+    if args.dry_run:
+        log("==== DRY RUN MODE: simulating the full pipeline, no training launched ====")
+        if not dry_run_checks(args, exp_dir, root):
+            log("DRY RUN: prerequisite check failed; the real flow would abort here (no hang).")
+            return 1
+        if not args.skip_format:
+            log("[DRY-RUN] stage 1A/1B/1C: subprocesses skipped (simulation only)")
+        else:
+            log("[DRY-RUN] stage 1A/1B/1C: skipped (SKIP_FORMAT)")
+        if not args.skip_s2:
+            log("[DRY-RUN] stage SoVITS(s2): simulating config + resume check + command")
+        else:
+            log("[DRY-RUN] stage SoVITS(s2): skipped (SKIP_S2)")
+        if not args.skip_s1:
+            log("[DRY-RUN] stage GPT(s1): simulating config + resume check + command")
+        else:
+            log("[DRY-RUN] stage GPT(s1): skipped (SKIP_S1)")
+    elif args.skip_format:
         log("skip format (1A/1B/1C)")
     else:
         if not args.skip_1a:
@@ -525,7 +710,7 @@ def main() -> int:
     else:
         log("skip GPT train")
 
-    log("All done.")
+    log("All done." + (" (DRY RUN: nothing was launched)" if DRY_RUN else ""))
     log(f"SoVITS weights: {root}/SoVITS_weights_{args.version}/")
     log(f"GPT weights:    {root}/GPT_weights_{args.version}/")
     return 0

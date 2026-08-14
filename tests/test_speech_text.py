@@ -6,6 +6,10 @@ def test_removes_common_stage_directions_and_emoji():
     assert normalize_speech_text(text) == "你好呀！"
 
 
+def test_strips_speaking_style_control_tag():
+    assert normalize_speech_text("【说话语气:温柔】谢谢尼们。") == "谢谢尼们。"
+
+
 def test_removes_inner_monologue_but_keeps_spoken_text():
     text = "你好。（心里想着：今天也见到你了。）真的很开心哦！"
     assert normalize_speech_text(text) == "你好。真的很开心哦！"

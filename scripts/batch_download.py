@@ -871,6 +871,101 @@ def _select_bvid_candidates(values: list[str]) -> list[dict]:
     return selected
 
 
+
+
+# ─────────────────────────── collect plan helpers (HQ dataset) ───────────────────────────
+
+def load_plan_items(path: Path) -> list[dict]:
+    """Load plan items from wrapped {version,items} or bare list."""
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    if isinstance(data, dict) and "items" in data:
+        return list(data["items"])
+    if isinstance(data, list):
+        return list(data)
+    raise ValueError(f"unsupported plan format: {path}")
+
+
+def filter_plan_for_download(
+    items: list[dict],
+    *,
+    max_hours: float = 0,
+    existing_bvids: set[str] | None = None,
+) -> list[dict]:
+    """Priority-desc download list; skip downloaded; optional hour cap."""
+    existing_bvids = existing_bvids or set()
+    ready = []
+    for item in items:
+        bvid = str(item.get("bvid") or "")
+        status = str(item.get("status") or "planned")
+        if not bvid or bvid in existing_bvids:
+            continue
+        if status in {"downloaded", "skipped"}:
+            continue
+        if status not in {"planned", "failed"}:
+            continue
+        ready.append(item)
+    ready.sort(key=lambda x: (-float(x.get("priority_score") or 0), str(x.get("bvid"))))
+    if max_hours and max_hours > 0:
+        acc = 0.0
+        limited = []
+        for item in ready:
+            hours = float(item.get("duration") or 0) / 3600.0
+            if limited and acc + hours > max_hours:
+                break
+            limited.append(item)
+            acc += hours
+        return limited
+    return ready
+
+
+def mark_plan_status(items: list[dict], bvid: str, status: str) -> list[dict]:
+    out = []
+    for item in items:
+        row = dict(item)
+        if str(row.get("bvid")) == bvid:
+            row["status"] = status
+        out.append(row)
+    return out
+
+
+def append_training_assets(assets_path: Path, names: list[str]) -> None:
+    path = Path(assets_path)
+    existing: list[str] = []
+    seen: set[str] = set()
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            name = line.strip()
+            if not name or name.startswith("#"):
+                continue
+            if name not in seen:
+                existing.append(name)
+                seen.add(name)
+    for name in names:
+        name = str(name).strip()
+        if name and name not in seen:
+            existing.append(name)
+            seen.add(name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(existing) + ("\n" if existing else ""), encoding="utf-8")
+
+
+def save_plan_doc(path: Path, items: list[dict], *, meta: dict | None = None) -> None:
+    """Write plan keeping version wrapper when present."""
+    path = Path(path)
+    meta = dict(meta or {})
+    if path.exists():
+        try:
+            old = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(old, dict):
+                meta = {**old, **meta, "items": items}
+                path.write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                return
+        except (json.JSONDecodeError, OSError):
+            pass
+    doc = {"version": 1, "items": items, **meta}
+    path.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 # ─────────────────────────── 主入口 ───────────────────────────
 
 def main() -> None:
@@ -915,6 +1010,17 @@ def main() -> None:
         default=1,
         help="并行下载/转换任务数（建议 2-3，默认 1）",
     )
+    p.add_argument(
+        "--from-plan",
+        type=Path,
+        default=None,
+        help="从 collect_plan.json 下载（跳过搜索/去重/chat 过滤与全局 min_duration）",
+    )
+    p.add_argument(
+        "--append-training-assets",
+        action="store_true",
+        help="下载成功后将 wav 文件名追加到 data/training_assets.txt",
+    )
     args = p.parse_args()
     if args.download_workers < 1:
         p.error("--download-workers 必须至少为 1")
@@ -931,6 +1037,57 @@ def main() -> None:
     WAV_DIR.mkdir(parents=True, exist_ok=True)
 
     print("=== 真白花音录播批量下载 ===\n")
+
+    # ── HQ collect plan path: skip search / chat filter / global min_duration ──
+    if args.from_plan is not None:
+        plan_path = Path(args.from_plan)
+        if not plan_path.exists():
+            raise SystemExit(f"plan 不存在：{plan_path}")
+        plan_items = load_plan_items(plan_path)
+        existing = {
+            path.name.split("_", 1)[0] for path in RAW_DIR.glob("*.m4a")
+        } if args.new_only else set()
+        download_list = filter_plan_for_download(
+            plan_items,
+            max_hours=args.max_hours,
+            existing_bvids=existing,
+        )
+        print(f"[plan] {len(plan_items)} items → download {len(download_list)}")
+        if args.search_only:
+            for c in download_list:
+                print(
+                    f"  {c.get('bvid')} | tier={c.get('tier')} | "
+                    f"{(c.get('duration') or 0)/3600:.1f}h | {str(c.get('title', ''))[:50]}"
+                )
+            return
+        if not download_list:
+            print("\n=== 完成：没有待下载视频 ===")
+            return
+        client = init_client()
+        success = 0
+        new_wavs: list[str] = []
+        for i, c in enumerate(download_list, 1):
+            bvid = c["bvid"]
+            hours = float(c.get("duration") or 0) / 3600
+            print(f"\n--- [plan {i}/{len(download_list)}] {bvid} ({hours:.1f}h) ---")
+            try:
+                wav_path = download_one(client, bvid)
+            except Exception as exc:  # noqa: BLE001 — keep plan progressing
+                print(f"  failed: {exc}")
+                wav_path = None
+            ok = wav_path is not None
+            plan_items = mark_plan_status(
+                plan_items, bvid, "downloaded" if ok else "failed"
+            )
+            save_plan_doc(plan_path, plan_items)
+            if ok:
+                success += 1
+                new_wavs.append(Path(wav_path).name)
+        if args.append_training_assets and new_wavs:
+            append_training_assets(PROJECT_ROOT / "data" / "training_assets.txt", new_wavs)
+            print(f"training_assets += {len(new_wavs)} names")
+        print(f"\n=== plan 完成：成功 {success}/{len(download_list)} ===")
+        return
 
     # ── 搜索 ──
     keywords = args.keywords or [

@@ -1,0 +1,46 @@
+n_target: 20000
+zh_ratio: 0.60
+s_min: 55.0
+t_align: 0.45
+t_align_clip: 0.50
+max_source_share: 0.15
+duration_min: 1.5
+duration_max: 20.0
+min_rms_db: -40.0
+voiced_ratio_threshold: 0.75
+f0_cv_threshold: 0.15
+longest_voiced_threshold: 3.0
+speaker_policy: accept
+clip_min_score_lower: 0.25
+min_language_probability: 0.50
+min_avg_logprob: -1.0
+max_no_speech_probability: 0.60
+max_compression_ratio: 2.40
+listen_sample_size: 80
+est_zh_clips_per_hour_b: 80.0
+est_zh_clips_per_hour_a: 200.0
+weights:
+  align: 30
+  asr: 20
+  spk: 20
+  text: 15
+  src: 10
+  dur: 5
+tier_src_score:
+  B: 1.0
+  A: 0.75
+  C: 0.6
+min_duration_by_tier:
+  B: 600
+  A: 30
+  C: 1800
+validation:
+  # 数量已达标口径：中文不足不再阻断（V1 降为信息项 + warning），质量门 V2-V8 与人听仍生效。
+  fail_on_zh_shortfall: false
+  align_median_min: 0.55
+  align_p10_min: 0.45
+  speaker_p5_margin: 0.05
+  listen_ok_rate: 0.85
+  listen_l2_ok_rate: 0.80
+  listen_l3_ok_rate: 0.75
+  listen_critical_fail_rate: 0.10

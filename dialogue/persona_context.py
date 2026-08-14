@@ -103,6 +103,13 @@ def _matched_scenes(user_text: str) -> set[str]:
     return matched
 
 
+def _asr_item_allowed(item: dict, matched_scenes: set[str]) -> bool:
+    """late 仅告别场景可注入；无 era_tag 视为兼容旧数据可注入。"""
+    if item.get("era_tag") != "late":
+        return True
+    return "告别" in matched_scenes
+
+
 def _pick_fewshot(user_text: str, data: dict, rng: random.Random) -> list[str]:
     """按场景抽取 3-5 条台词：官方优先、中文为主、整句日语仅用户含日语时注入。"""
     official = data.get("official_comments", [])
@@ -123,6 +130,8 @@ def _pick_fewshot(user_text: str, data: dict, rng: random.Random) -> list[str]:
             chosen.append(text)
 
     scenes = _matched_scenes(user_text)
+    # late 过滤：仅对 asr_pool；无 era_tag 兼容旧数据
+    pool = [item for item in pool if _asr_item_allowed(item, scenes)]
     if scenes:
         add([item for item in official + fan if scenes & set(item.get("scenes", []))])
         if pool:

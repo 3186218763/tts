@@ -15,8 +15,19 @@ import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOVITS_ROOT = Path("/home/mtr/tt/GPT-SoVITS")
-DEFAULT_GPT_MODEL = PROJECT_ROOT / "model" / "huayin-e15.ckpt"
-DEFAULT_SOVITS_MODEL = PROJECT_ROOT / "model" / "huayin_e8_s2536.pth"
+DEFAULT_GPT_MODEL = PROJECT_ROOT / "model" / "huayin-gpt.ckpt"
+DEFAULT_SOVITS_MODEL = PROJECT_ROOT / "model" / "huayin-sovits.pth"
+
+# Prefer locked recipe if present (configs/huayin_precision.yaml).
+try:
+    sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+    from huayin_precision_recipe import delivery_paths  # type: ignore
+
+    _delivery = delivery_paths()
+    DEFAULT_GPT_MODEL = _delivery["gpt_model"]
+    DEFAULT_SOVITS_MODEL = _delivery["sovits_model"]
+except Exception:
+    pass
 
 
 def audio_compatibility_source() -> str:

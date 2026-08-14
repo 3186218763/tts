@@ -7,7 +7,7 @@ CONDA_ROOT="${CONDA_ROOT:-/home/mtr/miniconda3}"
 SESSION="${TMUX_SESSION:-huayin-v2pro-train}"
 DATASET_DIR="${DATASET_DIR:-$PROJECT_ROOT/data/dataset}"
 LOG_DIR="$PROJECT_ROOT/logs"
-LOG_FILE="$LOG_DIR/train_huayin_v2pro.log"
+LOG_FILE="${LOG_FILE:-$LOG_DIR/train_huayin_v2pro.log}"
 SYSTEM_LIBFFI="/lib/x86_64-linux-gnu/libffi.so.7"
 
 run_training() {
@@ -34,6 +34,41 @@ run_training() {
   if [[ "${SKIP_FORMAT:-0}" == "1" ]]; then
     format_args+=(--skip-format)
     echo "skip dataset formatting (SKIP_FORMAT=1)" | tee -a "$LOG_FILE"
+  fi
+  if [[ "${SKIP_S2:-0}" == "1" ]]; then
+    format_args+=(--skip-s2)
+    echo "skip SoVITS training (SKIP_S2=1)" | tee -a "$LOG_FILE"
+  fi
+  if [[ "${DRY_RUN:-0}" == "1" ]]; then
+    format_args+=(--dry-run)
+    echo "DRY RUN MODE: simulating full pipeline, no training launched" | tee -a "$LOG_FILE"
+  fi
+  if [[ -n "${LR_DECAY_STEPS:-}" ]]; then
+    format_args+=(--lr-decay-steps "$LR_DECAY_STEPS")
+  fi
+  if [[ -n "${S1_WARMUP_STEPS:-}" ]]; then
+    format_args+=(--s1-warmup-steps "$S1_WARMUP_STEPS")
+  fi
+  if [[ -n "${S1_DEV_FRAC:-}" ]]; then
+    format_args+=(--s1-dev-frac "$S1_DEV_FRAC")
+  fi
+  if [[ -n "${S1_VAL_BATCHES:-}" ]]; then
+    format_args+=(--s1-val-batches "$S1_VAL_BATCHES")
+  fi
+  if [[ -n "${LR_S1:-}" ]]; then
+    format_args+=(--lr-s1 "$LR_S1")
+  fi
+  if [[ -n "${S1_DROPOUT:-}" ]]; then
+    format_args+=(--s1-dropout "$S1_DROPOUT")
+  fi
+  if [[ -n "${S1_EARLY_STOP_PATIENCE:-}" ]]; then
+    format_args+=(--s1-early-stop-patience "$S1_EARLY_STOP_PATIENCE")
+  fi
+  if [[ -n "${S1_EARLY_STOP_MIN_DELTA:-}" ]]; then
+    format_args+=(--s1-early-stop-min-delta "$S1_EARLY_STOP_MIN_DELTA")
+  fi
+  if [[ -n "${S2_DROPOUT:-}" ]]; then
+    format_args+=(--s2-dropout "$S2_DROPOUT")
   fi
 
   [[ -f "$DATASET_DIR/annotation.list" ]] || {
@@ -73,7 +108,7 @@ PY
   # S1 attention scales sharply with sequence length; 8 is stable on 24 GiB cards.
   python -u "$PROJECT_ROOT/scripts/train_gpt_sovits.py" \
     --sovits-root "$SOVITS_ROOT" \
-    --exp-name huayin \
+    --exp-name "${EXP_NAME:-huayin}" \
     --list-path "$DATASET_DIR/annotation.list" \
     --wav-dir "$DATASET_DIR/audio" \
     --version v2Pro \
@@ -85,6 +120,8 @@ PY
     --epochs-s1 "${EPOCHS_S1:-15}" \
     --save-every-s2 "${SAVE_EVERY_S2:-4}" \
     --save-every-s1 "${SAVE_EVERY_S1:-1}" \
+    ${INIT_S1:+--init-s1 "$INIT_S1"} \
+    ${INIT_S2G:+--init-s2g "$INIT_S2G"} \
     "${format_args[@]}" \
     2>&1 | tee -a "$LOG_FILE"
   local status=${PIPESTATUS[0]}
@@ -101,9 +138,11 @@ start_session() {
   local env_name
   local env_value
   for env_name in \
-    TMUX_SESSION SOVITS_ROOT CONDA_ROOT DATASET_DIR SKIP_FORMAT \
+    TMUX_SESSION SOVITS_ROOT CONDA_ROOT DATASET_DIR SKIP_FORMAT LOG_FILE \
     FORMAT_WORKERS_PER_GPU FORMAT_WORKER_THREADS BATCH_SIZE_S2 BATCH_SIZE_S1 \
-    EPOCHS_S2 EPOCHS_S1 SAVE_EVERY_S2 SAVE_EVERY_S1; do
+    EPOCHS_S2 EPOCHS_S1 SAVE_EVERY_S2 SAVE_EVERY_S1 EXP_NAME INIT_S1 INIT_S2G \
+    SKIP_S2 DRY_RUN LR_DECAY_STEPS S1_WARMUP_STEPS S1_DEV_FRAC S1_VAL_BATCHES LR_S1 \
+    S1_DROPOUT S1_EARLY_STOP_PATIENCE S1_EARLY_STOP_MIN_DELTA S2_DROPOUT; do
     if [[ -v "$env_name" ]]; then
       printf -v env_value '%q' "${!env_name}"
       env_prefix+=" ${env_name}=${env_value}"

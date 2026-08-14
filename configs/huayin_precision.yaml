@@ -1,0 +1,128 @@
+# 花音 GPT-SoVITS v2Pro 满意配方（高精度子集 + 验证最优权重）
+# 2026-08-14 用户确认听感满意后固化。训练/选模/推理以此文件为准。
+#
+# 相关:
+#   data/dataset_precision/          训练数据
+#   docs/TRAINING_PRECISION.md       训练设计
+#   docs/precision-model-selection.json  验证曲线与选模记录
+#   outputs/listen_precision_e5_e12/ 陌生句试听样例
+#   scripts/run_precision_train_tmux.sh
+#   scripts/run_huayin_api.py / test_huayin_tts.py
+
+meta:
+  name: huayin-precision
+  version: v2Pro
+  locked_at: "2026-08-14"
+  status: approved  # 用户听感满意
+  notes: >
+    双 ASR 共识中文子集微调；S1 按 val_top_3_acc 取 e5；
+    S2 无 val 取 e12 终盘；推理参数与试听包一致。
+
+paths:
+  project_root: /home/mtr/tt/tts
+  sovits_root: /home/mtr/tt/GPT-SoVITS
+  conda_env_python: /home/mtr/miniconda3/envs/gptsovits/bin/python
+  dataset_dir: data/dataset_precision
+  annotation_list: data/dataset_precision/annotation.list
+  audio_dir: data/dataset_precision/audio
+  exp_name: huayin-precision
+  exp_dir: /home/mtr/tt/GPT-SoVITS/logs/huayin-precision
+  log_file: logs/train_huayin_precision.log
+  tmux_session: huayin-precision-train
+
+# 交付权重（验证最优）
+delivery:
+  gpt_model: model/huayin-gpt.ckpt
+  sovits_model: model/huayin-sovits.pth
+  ref_audio: model/huayin-ref.wav
+  ref_text: "所以和朋友一起吃饭的话比较好哦"
+  ref_language: zh
+  s1_epoch: 5
+  s2_epoch: 12
+  s1_val_top_3_acc: 0.250243
+  s1_val_total_loss: 382.7988
+  selection_metric: val_top_3_acc_epoch
+  selection_report: docs/precision-model-selection.json
+
+# 推理（与 outputs/listen_precision_e5_e12 试听一致）
+inference:
+  version: v2Pro
+  device: cuda
+  is_half: true
+  text_language: zh
+  top_k: 15
+  top_p: 1.0
+  temperature: 1.0
+  repetition_penalty: 1.35
+  speed_factor: 1.0
+  seed: 42
+  text_split_method: cut5
+  batch_size: 1
+  fragment_interval: 0.3
+  parallel_infer: true
+  streaming_mode: false
+
+# 高精度数据构建（无人工）
+dataset:
+  source_hq: data/dataset_hq
+  output_dir: data/dataset_precision
+  n_clips: 1179
+  language: zh
+  hours_approx: 1.25
+  engines:
+    primary: whisper_large_v3
+    secondary: funasr_paraformer_zh
+  consensus:
+    keep_strict: 0.92
+    keep_soft: 0.85
+    third_agree: 0.92
+    min_chars: 2
+  keep_rate_observed: 0.20  # 1179/5886
+
+# 训练配方
+train:
+  version: v2Pro
+  gpus: "0-1"
+  # 格式化 1A/1B/1C；重训时若特征已在可 SKIP_FORMAT=1
+  skip_format_default: true
+  format_workers_per_gpu: 4
+  format_worker_threads: 2
+  init:
+    s1: null   # 官方 s1v3.ckpt
+    s2g: null  # 官方 s2Gv2Pro.pth
+  s2:
+    batch_size: 8
+    epochs: 12
+    save_every_epoch: 2
+    p_dropout: 0.1
+    text_low_lr_rate: 0.4
+  s1:
+    batch_size: 8
+    epochs: 25  # 上限；早停可提前结束
+    save_every_n_epoch: 1
+    lr: 0.005
+    warmup_steps: 80
+    decay_steps: 450
+    dropout: 0.1
+    dev_frac: 0.10
+    val_batches: 40
+    early_stop_patience: 5
+    early_stop_min_delta: 0.001
+    early_stop_monitor: val_top_3_acc
+    if_dpo: false
+    seed: 1234
+
+# 对话层 TTS 客户端（configs/config.yaml 的 tts 节应对齐）
+dialogue_tts:
+  base_url: "http://127.0.0.1:9880"
+  ref_audio_path: /home/mtr/tt/tts/model/huayin-ref.wav
+  ref_text: "所以和朋友一起吃饭的话比较好哦"
+  ref_language: zh
+  text_language: auto
+  top_k: 15
+  top_p: 1.0
+  temperature: 1.0
+  repetition_penalty: 1.35
+  speed_factor: 1.0
+  seed: 42
+  text_split_method: cut5

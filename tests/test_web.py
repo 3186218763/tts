@@ -122,7 +122,8 @@ async def test_web_filters_stage_directions_before_text_and_audio():
 
     assert [event["type"] for event in events] == ["sentence", "audio", "done"]
     assert events[0]["text"] == "见到你真开心！"
-    tts.synthesize.assert_awaited_once_with("见到你真开心！")
+    tts.synthesize.assert_awaited_once()
+    assert tts.synthesize.await_args.args == ("见到你真开心！",)
     assert conversation.get_messages()[-1] == {
         "role": "assistant",
         "content": "见到你真开心！",

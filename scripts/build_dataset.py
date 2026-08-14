@@ -535,7 +535,18 @@ def filter_slices(
     force: bool = False,
     analyzer: Callable[..., Any] = analyze_slice,
     workers: int = 1,
+    checkpoint_every: int = 500,
+    log_every: int = 200,
+    submit_chunk: int = 0,
 ) -> list[dict[str, Any]]:
+    """Filter slices; resume-safe.
+
+    Performance notes:
+    - Do **not** write the full JSON every few items (was every 25) — that
+      serializes the parent and starves workers.
+    - Submit futures in chunks so we don't enqueue tens of thousands at once.
+    - Log progress summaries instead of one line per slice.
+    """
     thresholds = FilterThresholds() if thresholds is None else thresholds
     all_slices = sorted(SLICES_DIR.glob("*.wav"))
     if not all_slices:
@@ -561,6 +572,13 @@ def filter_slices(
         else:
             pending.append((index, wav))
 
+    total = len(slices)
+    already = len(results_by_path)
+    print(
+        f"  待分析 {len(pending)} / 总计 {total}"
+        f"（已缓存 {already}，{100.0 * already / total if total else 0:.1f}%）"
+    )
+
     def ordered_results() -> list[dict[str, Any]]:
         return [
             results_by_path[canonical_path(wav)]
@@ -568,40 +586,112 @@ def filter_slices(
             if canonical_path(wav) in results_by_path
         ]
 
-    def record_analysis(index: int, wav: Path, analysis_value: Any) -> None:
+    def record_analysis(
+        index: int, wav: Path, analysis_value: Any, *, verbose: bool
+    ) -> None:
         analysis = _as_plain_dict(analysis_value)
         record = {"path": str(wav), **analysis}
         results_by_path[canonical_path(wav)] = record
-        reason_suffix = f" ({record['reason']})" if record.get("reason") else ""
-        print(
-            f"  [{index}/{len(slices)}] {wav.name}  "
-            f"{'保留' if record.get('keep') else '剔除'}"
-            f"{reason_suffix}"
-        )
+        if verbose:
+            reason_suffix = f" ({record['reason']})" if record.get("reason") else ""
+            print(
+                f"  [{index}/{total}] {wav.name}  "
+                f"{'保留' if record.get('keep') else '剔除'}"
+                f"{reason_suffix}",
+                flush=True,
+            )
 
+    checkpoint_every = max(1, int(checkpoint_every))
+    log_every = max(1, int(log_every))
     analyzed_count = 0
+    keep_delta = 0
+    drop_delta = 0
     worker_count = max(1, min(int(workers), len(pending) or 1))
+    # Default chunk keeps the pool fed without queuing 50k+ futures.
+    if submit_chunk <= 0:
+        submit_chunk = max(worker_count * 8, 256)
+
+    def maybe_checkpoint(force_write: bool = False) -> None:
+        if force_write or (
+            analyzed_count > 0 and analyzed_count % checkpoint_every == 0
+        ):
+            _write_json(FILTER_RESULTS, ordered_results())
+            covered = len(results_by_path)
+            print(
+                f"  … checkpoint 本次+{analyzed_count} "
+                f"覆盖 {covered}/{total} ({100.0 * covered / total if total else 0:.1f}%) "
+                f"本轮 keep={keep_delta} drop={drop_delta}",
+                flush=True,
+            )
+
     try:
         if worker_count > 1 and analyzer is analyze_slice:
-            print(f"  使用 {worker_count} 个 CPU 进程并行提取音频特征")
+            print(
+                f"  使用 {worker_count} 个 CPU 进程并行"
+                f"（chunk={submit_chunk}, checkpoint_every={checkpoint_every}）",
+                flush=True,
+            )
             with ProcessPoolExecutor(max_workers=worker_count) as executor:
-                futures = {
-                    executor.submit(_analyze_slice_job, wav, thresholds): (index, wav)
-                    for index, wav in pending
-                }
-                for future in as_completed(futures):
-                    index, wav = futures[future]
-                    _, analysis = future.result()
-                    record_analysis(index, wav, analysis)
-                    analyzed_count += 1
-                    if analyzed_count % 25 == 0:
-                        _write_json(FILTER_RESULTS, ordered_results())
+                for chunk_start in range(0, len(pending), submit_chunk):
+                    chunk = pending[chunk_start : chunk_start + submit_chunk]
+                    futures = {
+                        executor.submit(_analyze_slice_job, wav, thresholds): (
+                            index,
+                            wav,
+                        )
+                        for index, wav in chunk
+                    }
+                    for future in as_completed(futures):
+                        index, wav = futures[future]
+                        _, analysis_raw = future.result()
+                        analysis = _as_plain_dict(analysis_raw)
+                        record_analysis(index, wav, analysis, verbose=False)
+                        analyzed_count += 1
+                        if analysis.get("keep"):
+                            keep_delta += 1
+                        else:
+                            drop_delta += 1
+                        if analyzed_count % log_every == 0:
+                            covered = len(results_by_path)
+                            print(
+                                f"  … progress 本次 {analyzed_count}/{len(pending)} "
+                                f"覆盖 {covered}/{total} "
+                                f"({100.0 * covered / total if total else 0:.1f}%)",
+                                flush=True,
+                            )
+                        maybe_checkpoint(False)
         else:
             for index, wav in pending:
-                record_analysis(index, wav, analyzer(wav, thresholds))
+                analysis = analyzer(wav, thresholds)
+                # analyzer may return dict or dataclass
+                analysis_dict = _as_plain_dict(analysis)
+                record_analysis(
+                    index,
+                    wav,
+                    analysis_dict,
+                    verbose=(log_every == 1),
+                )
                 analyzed_count += 1
+                if analysis_dict.get("keep"):
+                    keep_delta += 1
+                else:
+                    drop_delta += 1
+                if analyzed_count % log_every == 0:
+                    covered = len(results_by_path)
+                    print(
+                        f"  … progress 本次 {analyzed_count}/{len(pending)} "
+                        f"覆盖 {covered}/{total} "
+                        f"({100.0 * covered / total if total else 0:.1f}%)",
+                        flush=True,
+                    )
+                maybe_checkpoint(False)
     except BaseException:
         _write_json(FILTER_RESULTS, ordered_results())
+        print(
+            f"  ! interrupted after +{analyzed_count}; "
+            f"覆盖 {len(results_by_path)}/{total} 已落盘",
+            flush=True,
+        )
         raise
 
     results = ordered_results()

@@ -19,7 +19,8 @@ from dialogue.conversation import Conversation
 from dialogue.llm_client import LLMClient
 from dialogue.memory import prepare_chat_messages
 from dialogue.sentence_streamer import SentenceStreamer
-from dialogue.speech_text import normalize_speech_text
+from dialogue.speaking_style import SpeakingStyleRefBank, StylePrefixParser
+from dialogue.speech_text import normalize_speech_text, strip_style_for_history
 from dialogue.tts_client import TTSClient
 
 
@@ -86,12 +87,19 @@ class WebChatService:
     """Stream sentence and audio events while keeping one conversation history."""
 
     def __init__(
-        self, llm_client, tts_client, *, max_chars: int = 50, min_chars: int = 4
+        self,
+        llm_client,
+        tts_client,
+        *,
+        max_chars: int = 50,
+        min_chars: int = 4,
+        style_ref_bank: SpeakingStyleRefBank | None = None,
     ):
         self._llm = llm_client
         self._tts = tts_client
         self._max_chars = max_chars
         self._min_chars = min_chars
+        self._style_bank = style_ref_bank or SpeakingStyleRefBank()
 
     async def stream(
         self, user_text: str, conversation: Conversation
@@ -105,11 +113,24 @@ class WebChatService:
                 streamer = SentenceStreamer(
                     self._max_chars, min_chars=self._min_chars
                 )
-                full_response = ""
+                style_parser = StylePrefixParser()
+                full_speech = ""
+                ref_kwargs: dict[str, str] = {}
 
                 async for token in self._llm.stream_chat(messages):
-                    full_response += token
-                    for raw_sentence in streamer.add_token(token):
+                    speech_chunk = style_parser.feed(token)
+                    if style_parser.resolved and not ref_kwargs:
+                        clip = self._style_bank.resolve(style_parser.style)
+                        if clip is not None:
+                            ref_kwargs = {
+                                "ref_audio_path": clip.audio_path,
+                                "ref_text": clip.prompt_text,
+                                "ref_language": clip.prompt_lang,
+                            }
+                    if not speech_chunk:
+                        continue
+                    full_speech += speech_chunk
+                    for raw_sentence in streamer.add_token(speech_chunk):
                         sentence = normalize_speech_text(raw_sentence)
                         if not sentence:
                             continue
@@ -117,8 +138,21 @@ class WebChatService:
                             yield await self._audio_event(pending_audio)
                         yield {"type": "sentence", "text": sentence}
                         pending_audio = asyncio.create_task(
-                            self._tts.synthesize(sentence)
+                            self._tts.synthesize(sentence, **ref_kwargs)
                         )
+
+                tail = style_parser.flush()
+                if tail:
+                    full_speech += tail
+                    for raw_sentence in streamer.add_token(tail):
+                        sentence = normalize_speech_text(raw_sentence)
+                        if sentence:
+                            if pending_audio is not None:
+                                yield await self._audio_event(pending_audio)
+                            yield {"type": "sentence", "text": sentence}
+                            pending_audio = asyncio.create_task(
+                                self._tts.synthesize(sentence, **ref_kwargs)
+                            )
 
                 remaining = streamer.flush()
                 if remaining:
@@ -128,11 +162,13 @@ class WebChatService:
                             yield await self._audio_event(pending_audio)
                         yield {"type": "sentence", "text": sentence}
                         pending_audio = asyncio.create_task(
-                            self._tts.synthesize(sentence)
+                            self._tts.synthesize(sentence, **ref_kwargs)
                         )
                 if pending_audio is not None:
                     yield await self._audio_event(pending_audio)
-                normalized_response = normalize_speech_text(full_response)
+                normalized_response = normalize_speech_text(
+                    strip_style_for_history(full_speech)
+                )
                 if normalized_response is None:
                     raise RuntimeError("LLM returned an empty response")
             except asyncio.CancelledError:
