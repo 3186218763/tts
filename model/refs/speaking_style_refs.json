@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "note": "说话语气→参考音。日常=默认一般聊天；元气=更轻快标记态。日常主 ref 为交付听感锁定的 huayin-ref.wav。",
+  "default_style": "日常",
+  "styles": {
+    "日常": {
+      "primary": {
+        "id": "richang_prod",
+        "audio": "model/huayin-ref.wav",
+        "text": "所以和朋友一起吃饭的话比较好哦",
+        "lang": "zh",
+        "source": "delivery_locked"
+      },
+      "alternates": [
+        {
+          "id": "richang_a1",
+          "audio": "model/refs/richang_a1.wav",
+          "text": "我打算开播和大家聊天。",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/06561_zh.wav"
+        },
+        {
+          "id": "richang_a2",
+          "audio": "model/refs/richang_a2.wav",
+          "text": "如果有空的话我们一起吃饭。",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/07744_zh.wav"
+        }
+      ]
+    },
+    "元气": {
+      "primary": {
+        "id": "yuanqi_p",
+        "audio": "model/refs/yuanqi_p.wav",
+        "text": "这样的,所以你也一起开开心心哦。",
+        "lang": "zh",
+        "source": "data/dataset_precision/audio/08714_zh.wav"
+      },
+      "alternates": [
+        {
+          "id": "yuanqi_a2",
+          "audio": "model/refs/yuanqi_a2.wav",
+          "text": "啊,今天也想吃冰淇淋的一天。",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/07340_zh.wav"
+        },
+        {
+          "id": "yuanqi_a3",
+          "audio": "model/refs/yuanqi_a3.wav",
+          "text": "每天每天开心的,还有吃好吃的东西。",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/06870_zh.wav"
+        }
+      ]
+    },
+    "温柔": {
+      "primary": {
+        "id": "wenrou_p",
+        "audio": "model/refs/wenrou_p.wav",
+        "text": "不要勉强,好好休息哦。",
+        "lang": "zh",
+        "source": "data/dataset_precision/audio/01131_zh.wav"
+      },
+      "alternates": [
+        {
+          "id": "wenrou_a1",
+          "audio": "model/refs/wenrou_a1.wav",
+          "text": "嗯,谢谢,很多很多。",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/10358_zh.wav"
+        },
+        {
+          "id": "wenrou_a2",
+          "audio": "model/refs/wenrou_a2.wav",
+          "text": "不急不急,谢谢谢谢。",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/07895_zh.wav",
+          "qc": {
+            "duration_s": 3.86,
+            "peak": 0.279,
+            "rms": 0.0331,
+            "sr": 32000
+          }
+        }
+      ]
+    },
+    "俏皮": {
+      "primary": {
+        "id": "qiaopi_p",
+        "audio": "model/refs/qiaopi_p.wav",
+        "text": "哼,谢谢,麦当劳。",
+        "lang": "zh",
+        "source": "data/dataset_precision/audio/10262_zh.wav",
+        "qc": {
+          "duration_s": 4.93,
+          "peak": 0.414,
+          "rms": 0.0326,
+          "sr": 32000
+        }
+      },
+      "alternates": [
+        {
+          "id": "qiaopi_a1",
+          "audio": "model/refs/qiaopi_a1.wav",
+          "text": "哇,真的不好的西湖,给你一拳!",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/07311_zh.wav",
+          "qc": {
+            "duration_s": 3.07,
+            "peak": 0.279,
+            "rms": 0.0307,
+            "sr": 32000
+          }
+        },
+        {
+          "id": "qiaopi_a2",
+          "audio": "model/refs/qiaopi_a2.wav",
+          "text": "哼,我们呢,对不起。",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/12977_zh.wav",
+          "qc": {
+            "duration_s": 4.14,
+            "peak": 0.078,
+            "rms": 0.0143,
+            "sr": 32000
+          }
+        }
+      ]
+    },
+    "倔强": {
+      "primary": {
+        "id": "juejiang_p",
+        "audio": "model/refs/juejiang_p.wav",
+        "text": "不要!不要!",
+        "lang": "zh",
+        "source": "data/dataset_precision/audio/02834_zh.wav",
+        "qc": {
+          "duration_s": 3.34,
+          "peak": 0.702,
+          "rms": 0.0886,
+          "sr": 32000
+        }
+      },
+      "alternates": [
+        {
+          "id": "juejiang_a1",
+          "audio": "model/refs/juejiang_a1.wav",
+          "text": "我就不要你这个妈妈了。",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/00009_zh.wav",
+          "qc": {
+            "duration_s": 3.62,
+            "peak": 0.382,
+            "rms": 0.0345,
+            "sr": 32000
+          }
+        },
+        {
+          "id": "juejiang_a2",
+          "audio": "model/refs/juejiang_a2.wav",
+          "text": "睡觉吗?不要睡觉,不要睡觉。",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/14214_zh.wav",
+          "qc": {
+            "duration_s": 4.55,
+            "peak": 0.153,
+            "rms": 0.0182,
+            "sr": 32000
+          }
+        }
+      ]
+    },
+    "惊讶": {
+      "primary": {
+        "id": "jingya_p",
+        "audio": "model/refs/jingya_p.wav",
+        "text": "什么呀?这个什么呀?什么意思呀?",
+        "lang": "zh",
+        "source": "data/dataset_precision/audio/10723_zh.wav",
+        "qc": {
+          "duration_s": 4.55,
+          "peak": 0.637,
+          "rms": 0.083,
+          "sr": 32000
+        }
+      },
+      "alternates": [
+        {
+          "id": "jingya_a1",
+          "audio": "model/refs/jingya_a1.wav",
+          "text": "完全没发现啊,真的吗?",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/06465_zh.wav",
+          "qc": {
+            "duration_s": 3.07,
+            "peak": 0.718,
+            "rms": 0.0926,
+            "sr": 32000
+          }
+        },
+        {
+          "id": "jingya_a2",
+          "audio": "model/refs/jingya_a2.wav",
+          "text": "我怎么办呀?啊!可以呀!",
+          "lang": "zh",
+          "source": "data/dataset_precision/audio/10400_zh.wav",
+          "qc": {
+            "duration_s": 3.83,
+            "peak": 0.473,
+            "rms": 0.0507,
+            "sr": 32000
+          }
+        }
+      ]
+    }
+  }
+}

@@ -14,11 +14,45 @@ from typing import Any
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOVITS_ROOT = Path("/home/mtr/tt/GPT-SoVITS")
 DEFAULT_DATASET_DIR = PROJECT_ROOT / "data" / "dataset"
-DEFAULT_REFERENCE_AUDIO = PROJECT_ROOT / "model" / "huayin_ref.wav"
+DEFAULT_REFERENCE_AUDIO = PROJECT_ROOT / "model" / "huayin-ref.wav"
 DEFAULT_REFERENCE_TEXT = "所以和朋友一起吃饭的话比较好哦"
 DEFAULT_REFERENCE_LANGUAGE = "zh"
-DEFAULT_GPT_MODEL = PROJECT_ROOT / "model" / "huayin-e15.ckpt"
-DEFAULT_SOVITS_MODEL = PROJECT_ROOT / "model" / "huayin_e8_s2536.pth"
+DEFAULT_GPT_MODEL = PROJECT_ROOT / "model" / "huayin-gpt.ckpt"
+DEFAULT_SOVITS_MODEL = PROJECT_ROOT / "model" / "huayin-sovits.pth"
+DEFAULT_SEED = 42
+DEFAULT_TOP_K = 15
+DEFAULT_TOP_P = 1.0
+DEFAULT_TEMPERATURE = 1.0
+DEFAULT_REPETITION_PENALTY = 1.35
+DEFAULT_SPEED = 1.0
+DEFAULT_SPLIT_METHOD = "cut5"
+DEFAULT_TEXT_LANGUAGE = "zh"
+DEFAULT_DEVICE = "cuda"
+
+# Locked recipe overrides (configs/huayin_precision.yaml).
+try:
+    sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+    from huayin_precision_recipe import delivery_paths, inference_params  # type: ignore
+
+    _d = delivery_paths()
+    _i = inference_params()
+    DEFAULT_GPT_MODEL = _d["gpt_model"]
+    DEFAULT_SOVITS_MODEL = _d["sovits_model"]
+    DEFAULT_REFERENCE_AUDIO = _d["ref_audio"]
+    DEFAULT_REFERENCE_TEXT = str(_d["ref_text"])
+    DEFAULT_REFERENCE_LANGUAGE = str(_d["ref_language"])
+    DEFAULT_SEED = int(_i.get("seed", DEFAULT_SEED))
+    DEFAULT_TOP_K = int(_i.get("top_k", DEFAULT_TOP_K))
+    DEFAULT_TOP_P = float(_i.get("top_p", DEFAULT_TOP_P))
+    DEFAULT_TEMPERATURE = float(_i.get("temperature", DEFAULT_TEMPERATURE))
+    DEFAULT_REPETITION_PENALTY = float(_i.get("repetition_penalty", DEFAULT_REPETITION_PENALTY))
+    DEFAULT_SPEED = float(_i.get("speed_factor", DEFAULT_SPEED))
+    DEFAULT_SPLIT_METHOD = str(_i.get("text_split_method", DEFAULT_SPLIT_METHOD))
+    DEFAULT_TEXT_LANGUAGE = str(_i.get("text_language", DEFAULT_TEXT_LANGUAGE))
+    DEFAULT_DEVICE = str(_i.get("device", DEFAULT_DEVICE))
+except Exception:
+    pass
+
 LANGUAGE_MAP = {"ZH": "zh", "JP": "ja", "EN": "en"}
 SUPPORTED_LANGUAGES = ("auto", "auto_yue", "en", "zh", "ja", "yue", "ko", "all_zh", "all_ja", "all_yue", "all_ko")
 
@@ -36,17 +70,17 @@ def parse_args() -> argparse.Namespace:
         help="Transcript of the reference audio. Defaults to the matching dataset annotation.",
     )
     parser.add_argument("--reference-language", choices=SUPPORTED_LANGUAGES, default=None)
-    parser.add_argument("--text-language", choices=SUPPORTED_LANGUAGES, default="zh")
+    parser.add_argument("--text-language", choices=SUPPORTED_LANGUAGES, default=DEFAULT_TEXT_LANGUAGE)
     parser.add_argument("--output", type=Path, default=None, help="Output wav file or output directory")
-    parser.add_argument("--device", default="cuda", help="Inference device, for example cuda or cpu")
+    parser.add_argument("--device", default=DEFAULT_DEVICE, help="Inference device, for example cuda or cpu")
     parser.add_argument("--full-precision", action="store_true", help="Disable fp16 inference on CUDA")
-    parser.add_argument("--seed", type=int, default=42, help="Use -1 for a random seed")
-    parser.add_argument("--top-k", type=int, default=15)
-    parser.add_argument("--top-p", type=float, default=1.0)
-    parser.add_argument("--temperature", type=float, default=1.0)
-    parser.add_argument("--repetition-penalty", type=float, default=1.35)
-    parser.add_argument("--speed", type=float, default=1.0)
-    parser.add_argument("--split-method", default="cut5", help="GPT-SoVITS text split method")
+    parser.add_argument("--seed", type=int, default=DEFAULT_SEED, help="Use -1 for a random seed")
+    parser.add_argument("--top-k", type=int, default=DEFAULT_TOP_K)
+    parser.add_argument("--top-p", type=float, default=DEFAULT_TOP_P)
+    parser.add_argument("--temperature", type=float, default=DEFAULT_TEMPERATURE)
+    parser.add_argument("--repetition-penalty", type=float, default=DEFAULT_REPETITION_PENALTY)
+    parser.add_argument("--speed", type=float, default=DEFAULT_SPEED)
+    parser.add_argument("--split-method", default=DEFAULT_SPLIT_METHOD, help="GPT-SoVITS text split method")
     parser.add_argument("--dry-run", action="store_true", help="Validate inputs without loading models")
     return parser.parse_args()
 

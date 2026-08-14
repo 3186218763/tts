@@ -26,6 +26,14 @@ def test_requires_spoken_dialogue_only():
     assert "心理活动" in prompt
 
 
+def test_requires_speaking_style_tag_protocol():
+    prompt = get_system_prompt()
+    assert "说话语气" in prompt
+    assert "【说话语气:日常】" in prompt
+    for style in ("日常", "元气", "温柔", "俏皮", "倔强", "惊讶"):
+        assert f"【说话语气:{style}】" in prompt or style in prompt
+
+
 def test_persona_card_honesty_clause_and_red_lines():
     prompt = get_system_prompt()
     assert "AI 复刻" in prompt

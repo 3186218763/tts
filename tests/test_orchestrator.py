@@ -36,6 +36,30 @@ async def test_chat_yields_sentences_and_synthesizes_audio():
 
 
 @pytest.mark.asyncio
+async def test_chat_uses_speaking_style_ref_and_hides_tag():
+    mock_llm = AsyncMock()
+    mock_llm.stream_chat = MagicMock(
+        return_value=_async_iter(["【说话语气:倔强】", "谁说我小！", "我是大大的。"])
+    )
+    mock_tts = AsyncMock()
+    mock_tts.synthesize = AsyncMock(return_value=b"audio")
+    mock_player = AsyncMock()
+    mock_player.play_wav_bytes = AsyncMock()
+
+    orch = Orchestrator(mock_llm, mock_tts, mock_player)
+    conv = Conversation()
+    sentences = [s async for s in orch.chat("你好小只", conv)]
+
+    assert sentences == ["谁说我小！", "我是大大的。"]
+    assert "说话语气" not in conv.get_messages()[-1]["content"]
+    assert mock_tts.synthesize.call_count == 2
+    kwargs = mock_tts.synthesize.await_args_list[0].kwargs
+    assert "倔强" in kwargs.get("ref_audio_path", "") or kwargs.get("ref_text")
+    # primary 倔强 ref text
+    assert kwargs.get("ref_text") == "不要!不要!"
+
+
+@pytest.mark.asyncio
 async def test_chat_saves_conversation_history():
     mock_llm = AsyncMock()
     mock_llm.stream_chat = MagicMock(return_value=_async_iter(["你好。"]))
@@ -131,7 +155,8 @@ async def test_stage_directions_are_not_displayed_spoken_or_saved():
     ]
 
     assert sentences == ["你好呀。"]
-    mock_tts.synthesize.assert_awaited_once_with("你好呀。")
+    mock_tts.synthesize.assert_awaited_once()
+    assert mock_tts.synthesize.await_args.args == ("你好呀。",)
     assert conv.get_messages()[-1] == {"role": "assistant", "content": "你好呀。"}
 
 
@@ -143,7 +168,7 @@ async def test_synthesizes_next_sentence_while_previous_audio_is_playing():
     allow_first_playback_to_finish = asyncio.Event()
     synth_calls = 0
 
-    async def synthesize(sentence):
+    async def synthesize(sentence, **_kwargs):
         nonlocal synth_calls
         synth_calls += 1
         if synth_calls == 2:

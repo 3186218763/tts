@@ -5,6 +5,13 @@ from __future__ import annotations
 import re
 import unicodedata
 
+from .speaking_style import strip_speaking_style_prefix
+
+
+def strip_style_for_history(text: str) -> str:
+    """Remove leading speaking-style control tags before history save."""
+    return strip_speaking_style_prefix(text)
+
 
 _CODE_BLOCK_RE = re.compile(r"```[\s\S]*?```|~~~[\s\S]*?~~~")
 _HTML_BLOCK_RE = re.compile(r"<([A-Za-z][\w:-]*)\b[^>]*>[\s\S]*?</\1>")
@@ -198,7 +205,8 @@ def normalize_speech_text(text: str) -> str | None:
     if not isinstance(text, str) or not text.strip():
         return None
 
-    normalized = _CODE_BLOCK_RE.sub(" ", text)
+    normalized = strip_speaking_style_prefix(text)
+    normalized = _CODE_BLOCK_RE.sub(" ", normalized)
     normalized = _HTML_BLOCK_RE.sub(" ", normalized)
     normalized = _HTML_TAG_RE.sub(" ", normalized)
     normalized = _MARKDOWN_IMAGE_RE.sub(" ", normalized)

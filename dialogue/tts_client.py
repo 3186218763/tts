@@ -62,8 +62,19 @@ class TTSClient:
                 "TTS 服务未运行，请先启动 GPT-SoVITS API"
             ) from exc
 
-    async def synthesize(self, text: str, text_language: str | None = None) -> bytes:
-        """将文本合成为 WAV 格式音频字节。"""
+    async def synthesize(
+        self,
+        text: str,
+        text_language: str | None = None,
+        *,
+        ref_audio_path: str | None = None,
+        ref_text: str | None = None,
+        ref_language: str | None = None,
+    ) -> bytes:
+        """将文本合成为 WAV 格式音频字节。
+
+        可选覆盖本轮参考音（说话语气库）；缺省用客户端构造时的默认 ref。
+        """
         normalized_text = normalize_speech_text(text)
         if normalized_text is None:
             raise ValueError("text contains no speakable content")
@@ -76,9 +87,9 @@ class TTSClient:
                 json={
                     "text": normalized_text,
                     "text_lang": language,
-                    "ref_audio_path": self._ref_audio_path,
-                    "prompt_text": self._ref_text,
-                    "prompt_lang": self._ref_language,
+                    "ref_audio_path": ref_audio_path or self._ref_audio_path,
+                    "prompt_text": ref_text if ref_text is not None else self._ref_text,
+                    "prompt_lang": ref_language or self._ref_language,
                     "text_split_method": self._text_split_method,
                     "top_k": self._top_k,
                     "top_p": self._top_p,

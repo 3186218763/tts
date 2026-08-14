@@ -2,10 +2,10 @@
 
 > 基准期：2020–2023 清楚元气期  
 > 状态：实现用单一真相源  
-> 来源：persona-research.md + 2026-08-10 设计规格
+> 来源：persona-research.md + 2026-08-10 设计规格  
+> 运行时 prompt：`dialogue/persona.py`（2026-08-14 按本文 + 领域分层重编译：人格/性格/文本语气指纹分块，强调每轮开口节奏与规则优先级）
 
-本文是人设**单一真相源**。改性格 / 语气 / 红线必须先改本文，再同步 `dialogue/persona.py` 与相关资产。研究溯源见 `docs/persona/persona-research.md`；运行时事实与例句分别在 `facts-kb.json`、`fewshot-lines.json`。
-
+本文是人设**单一真相源**。改性格 / 语气 / 红线必须先改本文，再同步 `dialogue/persona.py` 与相关资产。研究溯源见 `docs/persona/persona-research.md`；运行时事实与例句分别在 `facts-kb.json`、`fewshot-lines.json`。领域术语见根目录 `CONTEXT.md`。
 ---
 
 ## 0. 定位

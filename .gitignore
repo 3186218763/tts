@@ -7,13 +7,13 @@ venv/
 # 配置（含 API key）
 configs/config.yaml
 
-# 模型与数据
+# 模型（交付权重走 LFS 例外跟踪）
 model/*.ckpt
 model/*.pth
-!model/huayin-e15.ckpt
-!model/huayin_e8_s2536.pth
-data/*
-!data/training_assets.txt
+!model/huayin-gpt.ckpt
+!model/huayin-sovits.pth
+# 数据本地保留，不推远程（训练/采集产物）
+data/
 
 # 前端构建产物
 frontend/dist/
@@ -23,12 +23,12 @@ frontend/node_modules/
 logs/
 outputs/
 
+# 本地归档（训练元数据等，体积较大时可不入库）
+archive/
+
 # IDE
 .vscode/
 .idea/
-
-# 头脑风暴视觉伴侣
-.superpowers/
 
 # OS
 .DS_Store
