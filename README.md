@@ -15,48 +15,53 @@
 
 ## 快速开始
 
-### 1. 安装依赖
+### 0. 前置要求
+
+- Ubuntu 22.04 + NVIDIA GPU ≥8GB（CUDA 12.x 驱动）+ Node.js（前端构建）
+- `git-lfs`（模型权重走 LFS，未安装时只会拉到 134 字节指针文件）
+
+### 1. 一键配置环境
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e .            # 对话核心（CLI 播放需要 libsndfile / PortAudio）
-pip install -e '.[web]'     # 额外安装 FastAPI + uvicorn + faster-whisper
+bash scripts/setup_runtime_env.sh
 ```
 
-### 2. 配置
+脚本自动完成：系统依赖 → 项目 venv（`uv sync`）→ GPT-SoVITS 代码与独立 venv →
+推理基础模型（BERT/HuBERT/G2PW/声纹/语种检测）→ LFS 权重 → `configs/config.yaml` →
+前端构建。可重复执行、断点续传。详细步骤与排障见 [`docs/SETUP_RUNTIME.md`](docs/SETUP_RUNTIME.md)。
+
+配置脚本会生成本机 `configs/config.yaml`；其中 **`llm.api_key` 需要手动填写**（默认指向
+DeepSeek 兼容网关，也可换成 OpenAI 兼容地址）。
+
+**TTS 满意配方（训练/选模/推理全参数已锁定）：** [`configs/huayin_precision.yaml`](configs/huayin_precision.yaml)
+
+### 2. 启动服务
 
 ```bash
-cp configs/config.example.yaml configs/config.yaml
-# 编辑 configs/config.yaml：填入 DeepSeek API key、模型与 GPT-SoVITS 地址
+bash scripts/run_local.sh          # 后台启动 TTS API + Web，日志在 logs/
+bash scripts/run_local.sh --status # 查看状态
 ```
 
-**TTS 满意配方（训练/选模/推理全参数）已锁定：** [`configs/huayin_precision.yaml`](configs/huayin_precision.yaml)
+浏览器打开 `http://127.0.0.1:8000/`（健康检查 `/healthz`）。TTS API 默认端口 9880，
+被占用或环境拦截时脚本自动回退 18080 并写回 `config.yaml`。
 
-### 3. 启动 GPT-SoVITS TTS 服务
+### 3. 验证
 
 ```bash
-# 使用安装了 GPT-SoVITS 依赖的 Python 环境启动推理 API（默认 127.0.0.1:9880）
-python scripts/run_huayin_api.py --python /path/to/gptsovits/bin/python
+# 单条 TTS 冒烟
+curl -s -X POST http://127.0.0.1:<TTS端口>/tts -H 'Content-Type: application/json' \
+  -d '{"text":"你好，今天也要加油哦。","text_lang":"zh",
+       "ref_audio_path":"<仓库路径>/model/huayin-ref.wav",
+       "prompt_lang":"zh","prompt_text":"所以和朋友一起吃饭的话比较好哦",
+       "media_type":"wav"}' -o /tmp/tts.wav
+
+# 端到端（SSE：sentence → audio → done）
+curl -sN -X POST http://127.0.0.1:8000/api/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"你好","session_id":"smoke"}'
 ```
 
-### 4. 对话
-
-```bash
-# CLI 模式（Ctrl+C 退出）
-python -m frontend.cli
-
-# Web 模式（先构建前端，再启动服务；浏览器打开 http://127.0.0.1:8000/，健康检查 /healthz）
-cd frontend && npm install && npm run build
-cd .. && python -m frontend.web --host 127.0.0.1 --port 8000
-```
-
-仅验证本地模型推理、不启动对话层：
-
-```bash
-python scripts/test_huayin_tts.py "你好，今天也要加油。"
-```
-
-完整部署说明（局域网访问、健康检查字段、录音功能）见 [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)。
+仅验证本地模型推理、不启动对话层：`python scripts/test_huayin_tts.py "你好，今天也要加油。"`
 
 ## 项目结构
 
@@ -192,7 +197,7 @@ python scripts/train_gpt_sovits.py \
 python -m pytest -q
 ```
 
-198 个测试覆盖对话核心、切句、记忆压缩、流水线、Web SSE、配置加载与数据管线逻辑，
+277 个测试覆盖对话核心、切句、记忆压缩、流水线、Web SSE、配置加载与数据管线逻辑，
 全部 mock 化，不依赖外部 API 或 GPU。
 
 ## 外部依赖说明
