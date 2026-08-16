@@ -83,14 +83,6 @@ class Orchestrator:
             try:
                 async for token in self._llm.stream_chat(messages):
                     speech_chunk = style_parser.feed(token)
-                    if style_parser.resolved and not ref_kwargs:
-                        clip = self._style_bank.resolve(style_parser.style)
-                        if clip is not None:
-                            ref_kwargs = {
-                                "ref_audio_path": clip.audio_path,
-                                "ref_text": clip.prompt_text,
-                                "ref_language": clip.prompt_lang,
-                            }
                     if not speech_chunk:
                         continue
                     full_speech += speech_chunk

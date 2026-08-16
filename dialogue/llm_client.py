@@ -109,7 +109,12 @@ class LLMClient:
                     frequency_penalty=self._frequency_penalty,
                 )
                 async for chunk in stream:
-                    token = chunk.choices[0].delta.content
+                    choices = getattr(chunk, "choices", None) or []
+                    if not choices:
+                        # 部分网关在流末尾会发送 usage-only 的空 choices chunk，直接跳过。
+                        continue
+                    delta = choices[0].delta
+                    token = getattr(delta, "content", None) if delta is not None else None
                     if token:
                         emitted = True
                         yield token

@@ -36,7 +36,7 @@ async def test_chat_yields_sentences_and_synthesizes_audio():
 
 
 @pytest.mark.asyncio
-async def test_chat_uses_speaking_style_ref_and_hides_tag():
+async def test_chat_hides_style_tag_and_keeps_default_ref():
     mock_llm = AsyncMock()
     mock_llm.stream_chat = MagicMock(
         return_value=_async_iter(["【说话语气:倔强】", "谁说我小！", "我是大大的。"])
@@ -53,10 +53,9 @@ async def test_chat_uses_speaking_style_ref_and_hides_tag():
     assert sentences == ["谁说我小！", "我是大大的。"]
     assert "说话语气" not in conv.get_messages()[-1]["content"]
     assert mock_tts.synthesize.call_count == 2
-    kwargs = mock_tts.synthesize.await_args_list[0].kwargs
-    assert "倔强" in kwargs.get("ref_audio_path", "") or kwargs.get("ref_text")
-    # primary 倔强 ref text
-    assert kwargs.get("ref_text") == "不要!不要!"
+    # 已固定默认参考音：说话语气标签只做剥离，不再切换参考音。
+    for call in mock_tts.synthesize.await_args_list:
+        assert call.kwargs == {}
 
 
 @pytest.mark.asyncio
