@@ -138,7 +138,7 @@ CONFIG="$PROJECT_ROOT/configs/config.yaml"
 TTS_PORT="$(pick_tts_port)"
 sed -i -E "s|^(  base_url: )\"http://127\.0\.0\.1:[0-9]+\"|\1\"http://127.0.0.1:${TTS_PORT}\"|" "$CONFIG"
 sed -i -E "s|^(  ref_audio_path: ).*|\1\"$PROJECT_ROOT/model/huayin-ref.wav\"|" "$CONFIG"
-log "TTS 端口: $TTS_PORT；请确认 $CONFIG 中 llm.api_key 已填写"
+log "TTS 端口: $TTS_PORT；请确认 $CONFIG 中 llm.provider/api_key/model 已填写"
 
 # -------------------------------------------------------------------- frontend
 log "7/7 前端构建"

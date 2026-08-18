@@ -101,7 +101,33 @@ def test_load_config_defaults_protocol_to_openai(tmp_path):
     path = tmp_path / "config.yaml"
     path.write_text(_base_yaml(), encoding="utf-8")
 
-    assert load_config(str(path)).llm.protocol == "openai"
+    config = load_config(str(path))
+    assert config.llm.provider == "openai"
+    assert config.llm.protocol == "openai"
+
+
+def test_load_config_resolves_gemini_provider_without_base_url(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        """
+llm:
+  provider: gemini
+  api_key: key
+  model: gemini-2.5-flash
+tts:
+  base_url: http://localhost:9880
+  ref_audio_path: /ref.wav
+  ref_text: ref
+  ref_language: zh
+""",
+        encoding="utf-8",
+    )
+
+    config = load_config(str(path))
+
+    assert config.llm.provider == "gemini"
+    assert config.llm.protocol == "gemini"
+    assert config.llm.base_url == "https://generativelanguage.googleapis.com/v1beta"
 
 
 def test_load_config_reads_anthropic_protocol(tmp_path):
@@ -112,8 +138,10 @@ def test_load_config_reads_anthropic_protocol(tmp_path):
         encoding="utf-8",
     )
 
-    assert load_config(str(path)).llm.protocol == "anthropic"
-    assert load_config(str(path)).llm.base_url == "https://opencode.ai/zen/go"
+    config = load_config(str(path))
+    assert config.llm.protocol == "anthropic"
+    assert config.llm.provider == "anthropic"
+    assert config.llm.base_url == "https://opencode.ai/zen/go"
 
 
 def test_load_config_rejects_invalid_protocol(tmp_path):
@@ -125,4 +153,18 @@ def test_load_config_rejects_invalid_protocol(tmp_path):
     )
 
     with pytest.raises(ValueError, match="protocol"):
+        load_config(str(path))
+
+
+def test_load_config_rejects_conflicting_provider_and_legacy_protocol(tmp_path):
+    path = tmp_path / "config.yaml"
+    path.write_text(
+        _base_yaml().replace(
+            "model: model",
+            "model: model\n  provider: gemini\n  protocol: anthropic",
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="provider.*protocol"):
         load_config(str(path))

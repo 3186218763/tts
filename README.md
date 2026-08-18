@@ -30,8 +30,9 @@ bash scripts/setup_runtime_env.sh
 推理基础模型（BERT/HuBERT/G2PW/声纹/语种检测）→ LFS 权重 → `configs/config.yaml` →
 前端构建。可重复执行、断点续传。详细步骤与排障见 [`docs/SETUP_RUNTIME.md`](docs/SETUP_RUNTIME.md)。
 
-配置脚本会生成本机 `configs/config.yaml`；其中 **`llm.api_key` 需要手动填写**（默认指向
-DeepSeek 兼容网关，也可换成 OpenAI 兼容地址）。
+配置脚本会生成本机 `configs/config.yaml`；只需填写 `llm.provider`、`llm.api_key` 和
+`llm.model`。支持 OpenAI（以及 OpenAI 兼容接口）、Anthropic、Gemini 三种方式，官方
+端点会按 provider 自动补齐；第三方兼容网关才需要额外填写 `llm.base_url`。
 
 **TTS 满意配方（训练/选模/推理全参数已锁定）：** [`configs/huayin_precision.yaml`](configs/huayin_precision.yaml)
 
@@ -69,7 +70,7 @@ curl -sN -X POST http://127.0.0.1:8000/api/chat \
 ├── config.py                    # 类型化配置加载（YAML → dataclass）
 ├── configs/config.example.yaml  # 配置模板（实际配置 config.yaml 被 gitignore）
 ├── dialogue/                    # 对话核心
-│   ├── llm_client.py            # OpenAI 兼容 / Anthropic 原生双协议流式客户端 + 摘要接口
+│   ├── llm_client.py            # OpenAI 兼容 / Anthropic / Gemini 流式客户端 + 摘要接口
 │   ├── tts_client.py            # GPT-SoVITS TTS API 客户端（统一接口，可换引擎）
 │   ├── asr_client.py            # 本地 faster-whisper 转写（懒加载）
 │   ├── conversation.py          # 对话历史：近期原文 + 滚动摘要 + 原子压缩
@@ -95,7 +96,7 @@ curl -sN -X POST http://127.0.0.1:8000/api/chat \
 
 | 配置节 | 关键项 | 说明 |
 |--------|--------|------|
-| `llm` | `api_key` / `base_url` / `model` / `protocol` | DeepSeek 兼容接口；`protocol` 支持 `openai`（默认）与 `anthropic` 原生协议；`temperature 0.8`、`max_tokens 400`、`frequency_penalty 0.15` 适合口语对话 |
+| `llm` | `provider` / `api_key` / `model`（`base_url` 可选） | `provider` 支持 `openai`（含兼容接口）、`anthropic`、`gemini`；旧配置的 `protocol` 仍兼容；`temperature 0.8`、`max_tokens 400`、`frequency_penalty 0.15` 适合口语对话 |
 | `tts` | `base_url` / `ref_audio_path` / `ref_text` | GPT-SoVITS 地址与参考音频；采样参数为可复现的保守默认（固定 `seed 42`） |
 | `asr` | `model` / `device` / `compute_type` | 浏览器录音转写，默认 `small`，首次使用会下载模型 |
 | `conversation` | `recent_turns` / `summary_trigger_turns` / `summary_trigger_chars` / `summary_max_chars` | 记忆分层阈值；旧配置 `max_turns` 仍作为 `recent_turns` 别名 |

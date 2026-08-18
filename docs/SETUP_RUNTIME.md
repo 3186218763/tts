@@ -34,7 +34,7 @@ bash scripts/setup_runtime_env.sh
    `torchaudio`（cu128，见下方坑 2）→ `requirements.txt`（跳过 `--no-binary=opencc`，opencc 装二进制轮子）
 4. 推理基础模型（只下必需项，见下方清单）
 5. `git lfs pull` 拉取交付权重（`model/huayin-gpt.ckpt` / `model/huayin-sovits.pth`）
-6. 生成并修正 `configs/config.yaml`（TTS 端口 + 本机 `ref_audio_path` 绝对路径；LLM key 需自行填写）
+6. 生成并修正 `configs/config.yaml`（TTS 端口 + 本机 `ref_audio_path` 绝对路径；LLM 的 provider/key/model 需自行填写）
 7. `npm install && npm run build` 构建前端
 
 ## 启动与验证
@@ -69,6 +69,17 @@ curl -sN -X POST http://127.0.0.1:8000/api/chat \
   -d '{"message":"你好","session_id":"smoke"}'
 # 期望 SSE：sentence → audio → done，无 error 事件
 ```
+
+LLM 最简配置示例（三选一，官方地址自动推导）：
+
+```yaml
+llm:
+  provider: gemini       # openai / anthropic / gemini
+  api_key: "your-api-key"
+  model: "gemini-2.5-flash"
+```
+
+OpenAI 兼容的第三方网关再增加 `base_url`；旧配置中的 `protocol` 仍可继续使用。
 
 ## 推理所需基础模型清单
 

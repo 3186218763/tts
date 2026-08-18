@@ -1,10 +1,10 @@
 llm:
-  api_key: "sk-your-deepseek-api-key"
-  # openai: OpenAI 兼容格式（默认）
-  # anthropic: Anthropic 原生协议，base_url 填 SDK 风格根地址（如 https://opencode.ai/zen/go，自动补 /v1/messages）
-  protocol: openai
-  base_url: "https://api.deepseek.com"
-  model: "deepseek-v4-flash"
+  # 三选一：openai（含兼容接口）/ anthropic / gemini
+  provider: openai
+  api_key: "your-api-key"
+  model: "gpt-4.1-mini"
+  # 只有第三方 OpenAI 兼容服务或自建网关需要填写：
+  # base_url: "https://api.deepseek.com/v1"
   # Voice-oriented replies should be concise and varied without becoming
   # unpredictable. Conversation summaries use a separate low temperature.
   temperature: 0.8

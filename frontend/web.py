@@ -200,7 +200,7 @@ def _default_service(config: AppConfig | None = None) -> WebChatService:
             api_key=config.llm.api_key,
             base_url=config.llm.base_url,
             model=config.llm.model,
-            protocol=config.llm.protocol,
+            provider=config.llm.provider,
             temperature=config.llm.temperature,
             max_tokens=config.llm.max_tokens,
             frequency_penalty=config.llm.frequency_penalty,
@@ -224,8 +224,8 @@ def _default_service(config: AppConfig | None = None) -> WebChatService:
     )
 
 
-def _is_configured(value: str | None, placeholder: str) -> bool:
-    return bool(value and value.strip() and value.strip() != placeholder)
+def _is_configured(value: str | None, *placeholders: str) -> bool:
+    return bool(value and value.strip() and value.strip() not in placeholders)
 
 
 def create_app(
@@ -349,7 +349,11 @@ def create_app(
             "service": "ai-huayin-web",
             "llm_configured": bool(
                 runtime_config
-                and _is_configured(runtime_config.llm.api_key, "sk-your-deepseek-api-key")
+                and _is_configured(
+                    runtime_config.llm.api_key,
+                    "sk-your-deepseek-api-key",
+                    "your-api-key",
+                )
             ),
             "tts_configured": bool(
                 runtime_config

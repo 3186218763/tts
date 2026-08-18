@@ -2,22 +2,32 @@ from dataclasses import dataclass, field
 from pathlib import Path
 import yaml
 
+from dialogue.llm_provider import DEFAULT_LLM_BASE_URLS, resolve_llm_provider
+
 
 @dataclass
 class LLMConfig:
     api_key: str
-    base_url: str
-    model: str
-    protocol: str = "openai"
+    base_url: str | None = None
+    model: str = ""
+    provider: str | None = None
+    # protocol remains a read/write compatibility alias for existing config.yaml.
+    protocol: str | None = None
     temperature: float = 0.8
     max_tokens: int = 400
     frequency_penalty: float = 0.15
 
     def __post_init__(self):
-        if self.protocol not in ("openai", "anthropic"):
-            raise ValueError(
-                f"llm.protocol 必须是 openai 或 anthropic，当前为 {self.protocol!r}"
-            )
+        if not isinstance(self.model, str) or not self.model.strip():
+            raise ValueError("llm.model 必须是非空字符串")
+        selected_provider = resolve_llm_provider(
+            provider=self.provider, protocol=self.protocol
+        )
+        self.provider = selected_provider
+        self.protocol = selected_provider
+        self.base_url = (
+            self.base_url or DEFAULT_LLM_BASE_URLS[selected_provider]
+        ).rstrip("/")
 
 
 @dataclass

@@ -421,13 +421,13 @@ def test_frontend_src_references_api_paths():
         assert endpoint in sources, f"前端源码未引用 {endpoint}"
 
 
-def _config_yaml(protocol: str = "anthropic") -> str:
+def _config_yaml(provider: str = "anthropic") -> str:
     return f"""
 llm:
   api_key: key
   base_url: https://example.test
   model: model
-  protocol: {protocol}
+  provider: {provider}
 tts:
   base_url: http://localhost:9880
   ref_audio_path: /ref.wav
@@ -437,7 +437,7 @@ tts:
 
 
 @pytest.mark.asyncio
-async def test_default_service_passes_llm_protocol_from_config(tmp_path):
+async def test_default_service_passes_llm_provider_from_config(tmp_path):
     from config import load_config
     from dialogue.llm_client import LLMClient
     from frontend.web import _default_service
@@ -453,10 +453,10 @@ async def test_default_service_passes_llm_protocol_from_config(tmp_path):
     await service._llm.aclose()
 
 
-def test_cli_passes_llm_protocol_from_config():
+def test_cli_passes_llm_provider_from_config():
     cli_path = Path(__file__).resolve().parents[1] / "frontend" / "cli.py"
     source = cli_path.read_text(encoding="utf-8")
-    assert "protocol=config.llm.protocol" in source
+    assert "provider=config.llm.provider" in source
 
 
 def test_create_app_lifespan_closes_llm_client(tmp_path):

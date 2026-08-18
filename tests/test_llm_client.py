@@ -177,7 +177,7 @@ def test_rejects_invalid_generation_settings(kwargs):
         LLMClient("fake", "fake", "test", client=AsyncMock(), **kwargs)
 
 
-@pytest.mark.parametrize("protocol", ["openai", "anthropic"])
+@pytest.mark.parametrize("protocol", ["openai", "anthropic", "gemini"])
 def test_accepts_valid_protocols(protocol):
     LLMClient("fake", "fake", "test", client=MagicMock(), protocol=protocol)
 
@@ -194,6 +194,17 @@ def test_anthropic_protocol_uses_injected_http_client():
         client=http, protocol="anthropic",
     )
     assert client._client is http
+
+
+def test_gemini_provider_uses_default_endpoint_and_injected_http_client():
+    http = MagicMock()
+    client = LLMClient(
+        "fake", model="gemini-2.5-flash", client=http, provider="gemini"
+    )
+
+    assert client._client is http
+    assert client._provider == "gemini"
+    assert client._base_url == "https://generativelanguage.googleapis.com/v1beta"
 
 
 def _mock_http(response=None):
@@ -273,6 +284,57 @@ async def test_anthropic_summarize_raises_on_empty_text():
 
 
 @pytest.mark.asyncio
+async def test_gemini_summarize_uses_native_payload_and_extracts_text():
+    captured = {}
+    response = MagicMock()
+    response.json.return_value = {
+        "candidates": [
+            {
+                "content": {
+                    "parts": [
+                        {"text": " 用户喜欢爵士乐。 "},
+                        {"text": "内部推理", "thought": True},
+                    ]
+                }
+            }
+        ]
+    }
+
+    async def _post(url, **kwargs):
+        captured["url"] = url
+        captured.update(kwargs)
+        return response
+
+    http = _mock_http()
+    http.post = AsyncMock(side_effect=_post)
+    client = LLMClient(
+        "gemini-key", "https://gemini.example/v1beta", "gemini-2.5-flash",
+        client=http, provider="gemini",
+    )
+
+    summary = await client.summarize_chat(
+        previous_summary="用户住在上海。",
+        messages=[{"role": "user", "content": "我喜欢爵士乐"}],
+        max_chars=100,
+    )
+
+    assert summary == "用户喜欢爵士乐。"
+    assert captured["url"] == (
+        "https://gemini.example/v1beta/models/"
+        "gemini-2.5-flash:generateContent"
+    )
+    assert captured["headers"]["x-goog-api-key"] == "gemini-key"
+    body = captured["json"]
+    assert body["systemInstruction"]["parts"][0]["text"] == SUMMARY_SYSTEM_PROMPT
+    assert "我喜欢爵士乐" in body["contents"][0]["parts"][0]["text"]
+    assert body["generationConfig"] == {
+        "temperature": 0.2,
+        "maxOutputTokens": 128,
+        "frequencyPenalty": 0.0,
+    }
+
+
+@pytest.mark.asyncio
 async def test_anthropic_base_url_with_v1_suffix_not_doubled():
     captured = {}
 
@@ -304,6 +366,79 @@ def _stream_response(events):
     response.status_code = 200
     response.aiter_lines = lambda: _aiter_lines(events)
     return response
+
+
+@pytest.mark.asyncio
+async def test_gemini_stream_uses_native_sse_and_converts_messages():
+    requests = []
+    events = [
+        {"candidates": [{"content": {"parts": [{"text": "你"}]}}]},
+        {
+            "candidates": [
+                {
+                    "content": {
+                        "parts": [
+                            {"text": "好"},
+                            {"text": "内部推理", "thought": True},
+                        ]
+                    }
+                }
+            ]
+        },
+    ]
+    sse = "".join(f"data: {json.dumps(event)}\n\n" for event in events)
+
+    async def handler(request):
+        requests.append(request)
+        return httpx.Response(
+            200,
+            headers={"content-type": "text/event-stream"},
+            content=sse.encode(),
+        )
+
+    http = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    client = LLMClient(
+        "gemini-key",
+        model="gemini-2.5-flash",
+        client=http,
+        provider="gemini",
+        temperature=0.75,
+        max_tokens=320,
+        frequency_penalty=0.2,
+    )
+    try:
+        tokens = [
+            token
+            async for token in client.stream_chat(
+                [
+                    {"role": "system", "content": "人设"},
+                    {"role": "user", "content": "你好"},
+                    {"role": "assistant", "content": "你好呀"},
+                ]
+            )
+        ]
+    finally:
+        await client.aclose()
+
+    assert tokens == ["你", "好"]
+    request = requests[0]
+    assert str(request.url) == (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        "gemini-2.5-flash:streamGenerateContent?alt=sse"
+    )
+    assert request.headers["x-goog-api-key"] == "gemini-key"
+    assert request.headers["accept"] == "text/event-stream"
+    body = json.loads(request.content)
+    assert body["systemInstruction"] == {"parts": [{"text": "人设"}]}
+    assert body["contents"] == [
+        {"role": "user", "parts": [{"text": "你好"}]},
+        {"role": "model", "parts": [{"text": "你好呀"}]},
+    ]
+    assert body["generationConfig"] == {
+        "temperature": 0.75,
+        "maxOutputTokens": 320,
+        "frequencyPenalty": 0.2,
+    }
 
 
 def _text_delta(text):
@@ -545,7 +680,7 @@ async def test_anthropic_stream_tolerates_system_message_without_content():
 
 
 def test_rejects_invalid_protocol_with_consistent_chinese_message():
-    with pytest.raises(ValueError, match="必须是 openai 或 anthropic"):
+    with pytest.raises(ValueError, match="protocol"):
         LLMClient("fake", "fake", "test", client=MagicMock(), protocol="gpt")
 
 
