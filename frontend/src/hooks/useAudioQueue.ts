@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { selectAutoPlayItem, type QueueItem } from "./audioQueuePolicy";
+
+export type { QueueItem } from "./audioQueuePolicy";
 
 const BAR_COUNT = 24;
 const MIN_BAR = 4;
-
-export interface QueueItem {
-  key: string; // `${messageId}:${index}`
-  url: string;
-}
 
 function createAudioContext(): AudioContext | null {
   const Ctor =
@@ -109,14 +107,15 @@ export function useAudioQueue() {
     );
   }, []);
 
-  // 队列首次获得条目时自动播放（enqueue 只入队，播放由本 effect 驱动）；
+  // 空闲时从最新入队的语音开始；旧语音仍留在历史消息中供手动重播。
   // 播放中/用户手动暂停时 activeRef 非 null 会跳过，不打断用户控制。
   useEffect(() => {
-    const first = items[0];
-    if (!first) return;
-    if (activeRef.current === null && audioRef.current?.paused) {
-      playItem(first);
-    }
+    const next = selectAutoPlayItem(
+      items,
+      activeRef.current,
+      audioRef.current?.paused ?? false,
+    );
+    if (next) playItem(next);
   }, [items, playItem]);
 
   const toggle = useCallback(
